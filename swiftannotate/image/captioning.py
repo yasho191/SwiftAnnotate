@@ -1,4 +1,5 @@
 from openai import OpenAI
+import google.generativeai as genai
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor
 from tqdm import tqdm
@@ -183,8 +184,6 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
         )
         
         self.detail = kwargs.get("detail", "low")
-        self.temperature = kwargs.get("temperature", 0)
-        self.max_tokens = kwargs.get("max_tokens", 256)
           
     def caption(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
         
@@ -219,8 +218,6 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
             response = self.client.chat.completions.create(
                 model=self.caption_model,
                 messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
                 **kwargs
             )
             image_caption = response.choices[0].message.content.strip()
@@ -259,8 +256,6 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
             response = self.client.chat.completions.create(
                 model=self.validation_model,
                 messages=messages,
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
                 response_format=ImageValidationOutput,
                 **kwargs
             )
@@ -274,7 +269,43 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
             confidence = 0.0
             
         return validation_reasoning, confidence
+
+class ImageCaptioningGemini(BaseImageCaptioning):
+    def __init__(
+        self, 
+        caption_model: str, 
+        validation_model: str,
+        api_key: str, 
+        caption_prompt: str | None = None, 
+        validation: bool = True,
+        validation_prompt: str | None = None,
+        validation_threshold: float = 0.5,
+        max_retry: int = 3, 
+        output_file: str | None = None,
+        **kwargs
+    ):
+        genai.configure(api_key=api_key)
+        self.caption_model = genai.GenerativeModel(model=caption_model)
+        self.validation_model = genai.GenerativeModel(model=validation_model)
         
+        super().__init__(
+            caption_prompt=caption_prompt,
+            validation=validation,
+            validation_prompt=validation_prompt,
+            validation_threshold=validation_threshold,
+            max_retry=max_retry,
+            output_file=output_file
+        )
+    
+    # TODO: Implement Gemini captioning 
+    def caption(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
+        raise NotImplementedError("Gemini not supported yet.")
+
+    # TODO: Implement Gemini validation
+    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
+        raise NotImplementedError("Gemini not supported yet.")    
+    
+    
 class ImageCaptioningQwen2VL(BaseImageCaptioning):
     def __init__(
         self, 

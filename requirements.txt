@@ -1,4 +1,5 @@
 openai
+google-generativeai
 qwen-vl-utils
 bitsandbytes==0.45.0
 flash_attn==2.5.8
