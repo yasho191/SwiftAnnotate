@@ -1,13 +1,15 @@
 from openai import OpenAI
-import transformers
 import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor
 from tqdm import tqdm
 import logging
 import json
 from PIL import Image
 from typing import List, Tuple, Dict
-import base64
 from pydantic import BaseModel
+from qwen_vision_utils import process_vision_info
+
+from swiftannotate.image.utils import encode_image
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
 class ImageValidationOutput(BaseModel):
@@ -20,8 +22,40 @@ class BaseImageCaptioning:
     Each base class must implement the following methods:
     - caption: generates a caption for an image
     - validate: validates a caption for an image
+    
+    The class also provides a default method to generate captions for a list of images:
     - generate: generates captions for a list of images
     """
+    
+    def __init__(
+        self, 
+        caption_prompt: str | None = None, 
+        validation: bool = True,
+        validation_prompt: str | None = None,
+        validation_threshold: float = 0.5,
+        max_retry: int = 3, 
+        output_file: str | None = None,
+        **kwargs
+    ):
+        if caption_prompt is None:
+            self.caption_prompt = BASE_IMAGE_CAPTION_PROMPT
+        self.caption_prompt = caption_prompt
+        
+        self.validation = validation
+        if validation_prompt is None:
+            self.validation_prompt = BASE_IMAGE_CAPTION_VALIDATION_PROMPT
+        else:
+            self.validation_prompt = validation_prompt
+            
+        self.validation_theshold = validation_threshold
+        self.max_retry = max_retry
+        
+        if output_file is None:
+            self.output_file = None
+        elif output_file.endswith(".json"):
+            self.output_file = output_file
+        else:
+            raise ValueError("Output file must be a either None or a JSON file.")
     
     def caption(self, image: Image.Image | str, **kwargs) -> str:
         """
@@ -70,154 +104,9 @@ class BaseImageCaptioning:
         Returns:
             List[Dict]: List of captions, validation reasoning and confidence scores for each image.
         """
-        raise NotImplementedError("generate method must be implemented in every subclass")
-    
-class ImageCaptionOpenAI(BaseImageCaptioning):
-    def __init__(
-        self, 
-        model: str, 
-        api_key: str, 
-        caption_prompt: str | None = None, 
-        validation: bool = True,
-        validation_prompt: str | None = None,
-        validation_threshold: float = 0.5,
-        max_retry: int = 3, 
-        output_file: str | None = None,
-        **kwargs
-    ):
-        self.model = model
-        self.client = OpenAI(api_key)
-        
-        if caption_prompt is None:
-            self.caption_prompt = BASE_IMAGE_CAPTION_PROMPT
-        self.caption_prompt = caption_prompt
-        
-        self.validation = validation
-        if validation_prompt is None:
-            self.validation_prompt = BASE_IMAGE_CAPTION_VALIDATION_PROMPT
-        else:
-            self.validation_prompt = validation_prompt
-            
-        self.validation_theshold = validation_threshold
-        self.max_retry = max_retry
-        
-        if output_file is None:
-            self.output_file = None
-        elif output_file.endswith(".json"):
-            self.output_file = output_file
-        else:
-            raise ValueError("Output file must be a either None or a JSON file.")
-        
-        self.detail = kwargs.get("detail", "low")
-        self.temperature = kwargs.get("temperature", 0)
-        self.max_tokens = kwargs.get("max_tokens", 256)
-        
-    def encode_image(self, image_path: str) -> str:
-        try:
-            with open(image_path, "rb") as image_file:
-                return base64.b64encode(image_file.read()).decode('utf-8')
-        except Exception as e:
-            logging.error(f"Image encoding failed: {e}")
-          
-    def caption(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
-        
-        if feedback_prompt:
-            generation_prompt = f"""
-                Last time the caption you generated for this image was incorrect because of the following reasons:
-                {feedback_prompt}
-                
-                Try to generate a better caption for the image.
-            """
-        else:
-            generation_prompt = "caption the given image."
-        
-        content = [
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{image}"
-                },
-                "detail": self.detail
-            },
-            {
-                "type": "text",
-                "text": generation_prompt,
-            },
-        ]
-        
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.caption_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": content
-                    }
-                ],
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                **kwargs
-            )
-            image_caption = response.choices[0].message.content.strip()
-            
-        except Exception as e:
-            logging.error(f"Image captioning failed: {e}")
-            image_caption = "ERROR"
-            
-        return image_caption
-    
-    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
-        content = [
-            {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{image}"
-                },
-                "detail": self.detail
-            },
-            {
-                "type": "text",
-                "text": caption
-            }
-        ]
-        
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.validation_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": content
-                    }
-                ],
-                max_tokens=self.max_tokens,
-                temperature=self.temperature,
-                response_format=ImageValidationOutput,
-                **kwargs
-            )
-            validation_output = response.choices[0].message.parsed
-            validation_reasoning = validation_output.validation_reasoning
-            confidence = validation_output.confidence
-            
-        except Exception as e:
-            logging.error(f"Image caption validation failed: {e}")
-            validation_reasoning = "ERROR"
-            confidence = 0.0
-            
-        return validation_reasoning, confidence
-    
-    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         results = []
         for image_path in tqdm(image_paths, desc="Generating captions:"):
-            image = self.encode_image(image_path)
+            image = encode_image(image_path)
             
             if self.validation:
                 validation_flag = False
@@ -265,24 +154,281 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
             logging.info(f"Successfully saved results to {self.output_file}")
             
         return results
+    
+class ImageCaptionOpenAI(BaseImageCaptioning):
+    def __init__(
+        self, 
+        caption_model: str, 
+        validation_model: str,
+        api_key: str, 
+        caption_prompt: str | None = None, 
+        validation: bool = True,
+        validation_prompt: str | None = None,
+        validation_threshold: float = 0.5,
+        max_retry: int = 3, 
+        output_file: str | None = None,
+        **kwargs
+    ):
+        self.caption_model = caption_model
+        self.validation_model = validation_model
+        self.client = OpenAI(api_key)
         
-class ImageCaptionHuggingFace(BaseImageCaptioning):
+        super().__init__(
+            caption_prompt=caption_prompt,
+            validation=validation,
+            validation_prompt=validation_prompt,
+            validation_threshold=validation_threshold,
+            max_retry=max_retry,
+            output_file=output_file
+        )
+        
+        self.detail = kwargs.get("detail", "low")
+        self.temperature = kwargs.get("temperature", 0)
+        self.max_tokens = kwargs.get("max_tokens", 256)
+          
+    def caption(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
+        
+        if feedback_prompt:
+            user_prompt = f"""
+                Last time the caption you generated for this image was incorrect because of the following reasons:
+                {feedback_prompt}
+                
+                Try to generate a better caption for the image.
+            """
+        else:
+            user_prompt = "Describe the given image."
+        
+        content = [
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image}"
+                },
+                "detail": self.detail
+            },
+            {
+                "type": "text",
+                "text": user_prompt,
+            },
+        ]
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.caption_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": self.caption_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": content
+                    }
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                **kwargs
+            )
+            image_caption = response.choices[0].message.content.strip()
+            
+        except Exception as e:
+            logging.error(f"Image captioning failed: {e}")
+            image_caption = "ERROR"
+            
+        return image_caption
+    
+    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
+        content = [
+            {
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image}"
+                },
+                "detail": self.detail
+            },
+            {
+                "type": "text",
+                "text": caption + "\nValidate the caption generated for the given image."
+            }
+        ]
+        
+        try:
+            response = self.client.chat.completions.create(
+                model=self.validation_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": self.validation_prompt
+                    },
+                    {
+                        "role": "user",
+                        "content": content 
+                    }
+                ],
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                response_format=ImageValidationOutput,
+                **kwargs
+            )
+            validation_output = response.choices[0].message.parsed
+            validation_reasoning = validation_output.validation_reasoning
+            confidence = validation_output.confidence
+            
+        except Exception as e:
+            logging.error(f"Image caption validation failed: {e}")
+            validation_reasoning = "ERROR"
+            confidence = 0.0
+            
+        return validation_reasoning, confidence
+
+        
+class ImageCaptionQwen2VL(BaseImageCaptioning):
     def __init__(
         self, 
         model: str, 
-        tokenizer: str, 
+        processor: str,
+        caption_prompt: str | None = None, 
+        validation: bool = True,
+        validation_prompt: str | None = None,
+        validation_threshold: float = 0.5,
         max_retry: int = 3, 
-        output_file: str = "output.json"
+        output_file: str | None = None,
+        **kwargs
     ):
         self.model = model
-        self.tokenizer = tokenizer
+        self.processor = processor
         self.max_retry = max_retry
         
-    def caption(self, image: Image, **kwargs) -> str:
-        return 
+        super().__init__(
+            caption_prompt=caption_prompt,
+            validation=validation,
+            validation_prompt=validation_prompt,
+            validation_threshold=validation_threshold,
+            max_retry=max_retry,
+            output_file=output_file
+        )
+        
+        self.resize_height = kwargs.get("resize_height", 280)
+        self.resize_width = kwargs.get("resize_width", 420)
+        
+        # TODO: Add logic only if not supported by Qwen2VL vision processor
+        # Round off height and width to nearest multiple of 28
+        # self.resize_height = round(self.resize_height / 28) * 28
+        # self.resize_width = round(self.resize_width / 28) * 28
+
+    def caption(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
+        
+        if feedback_prompt:
+            user_prompt = f"""
+                Last time the caption you generated for this image was incorrect because of the following reasons:
+                {feedback_prompt}
+                
+                Try to generate a better caption for the image.
+            """
+        else:
+            user_prompt = "Describe the given image."
+        
+        messages = [
+            {"role": "system", "content": self.caption_prompt},
+            {
+                "role": "user", 
+                "content": [
+                    {
+                        "type": "image", 
+                        "image": f"data:image;base64,{image}",
+                        "resized_height": self.resize_height,
+                        "resized_width": self.resize_width,
+                    },
+                    {"type": "text", "text": user_prompt},
+                ],
+            },
+        ]
+        
+        text = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = self.processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        )
+        inputs = inputs.to(self.model.device)
+
+        # Inference: Generation of the output
+        generated_ids = self.model.generate(**inputs, **kwargs)
+        generated_ids_trimmed = [
+            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        output_text = self.processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )[0]
+        
+        return output_text
     
-    def validate(self, image: Image, caption: str, threshold: float, **kwargs) -> Tuple[str, float]:
-        return 
+    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
+        messages = [
+            {"role": "system", "content": self.validation_prompt},
+            {
+                "role": "user", 
+                "content": [
+                    {
+                        "type": "image", 
+                        "image": f"data:image;base64,{image}",
+                        "resized_height": self.resize_height,
+                        "resized_width": self.resize_width,
+                    },
+                    {"type": "text", "text": caption},
+                    {
+                        "type": "text", 
+                        "text": """
+                        Validate the caption generated for the given image. 
+                        Return output as a JSON object with keys as 'validation_reasoning' and 'confidence'.
+                        """
+                    },
+                ],
+            },
+        ]
+        
+        text = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = self.processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        )
+        inputs = inputs.to(self.model.device)
+
+        # Inference: Generation of the output
+        generated_ids = self.model.generate(**inputs, **kwargs)
+        generated_ids_trimmed = [
+            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        output_text = self.processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )[0]
+        
+        # TODO: Need a better way to parse the output
+        try:
+            output_text = output_text.replace('```', '').replace('json', '')
+            output_text = json.loads(output_text)
+            validation_reasoning = output_text["validation_reasoning"]
+            confidence = output_text["confidence"]
+        except Exception as e:
+            logging.error(f"Image caption validation parsing failed trying to parse using another logic.")
+            
+            number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in output_text)
+            potential_confidence_scores = [float(i) for i in number_str.split() if float(i) >= 0 and float(i) <= 1]
+            confidence = max(potential_confidence_scores) if potential_confidence_scores else 0.0
+            validation_reasoning = output_text
+        
+        return validation_reasoning, confidence
     
-    def generate(self, image_paths: List[str]) ->List[Tuple[str, str, float]]:
-        return
