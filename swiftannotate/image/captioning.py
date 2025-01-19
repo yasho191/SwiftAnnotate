@@ -6,7 +6,7 @@ from PIL import Image
 from typing import List
 import base64
 
-class ImageCaptioningBase:
+class BaseImageCaptioning:
     
     def caption(self, image: Image) -> str:
         raise NotImplementedError("caption method must be implemented in every subclass")
@@ -18,7 +18,7 @@ class ImageCaptioningBase:
         raise NotImplementedError("generate method must be implemented in every subclass")
     
 
-def ImageCaptionOpenAI(ImageCaptioningBase):
+def ImageCaptionOpenAI(BaseImageCaptioning):
     def __init__(
         self, 
         model: str, 
@@ -48,4 +48,24 @@ def ImageCaptionOpenAI(ImageCaptioningBase):
     def generate(self, image_paths: List[str]) -> List[str, float]:
         return 
         
+
+def ImageCaptionHuggingFace(BaseImageCaptioning):
+    def __init__(
+        self, 
+        model: str, 
+        tokenizer: str, 
+        max_retry: int = 3, 
+        output_file: str = "output.json"
+    ):
+        self.model = model
+        self.tokenizer = tokenizer
+        self.max_retry = max_retry
+        
+    def caption(self, image: Image, **kwargs) -> str:
+        return 
     
+    def validate(self, image: Image, caption: str, threshold: float, **kwargs) -> bool:
+        return 
+    
+    def generate(self, image_paths: List[str]) -> List[str, float]:
+        return
