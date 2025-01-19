@@ -43,12 +43,12 @@ Make sure you have conda installed on your system. To install SwiftAnnotate, fol
 
 The annotator-validator pipeline ensures high-quality annotations through a two-stage process:
 
-### Stage 1: Annotation
+**Stage 1: Annotation**
 
 - Primary LLM/VLM generates initial annotations
 - Configurable model selection (OpenAI, Google Gemini, Qwen-VL)
 
-### Stage 2: Validation
+**Stage 2: Validation**
 
 - Secondary model validates initial annotations
 - Cross-checks for hallucinations and factual accuracy
@@ -56,7 +56,7 @@ The annotator-validator pipeline ensures high-quality annotations through a two-
 - Option to regenerate annotations if validation fails
 - Structured output format for consistency
 
-### Benefits
+**Benefits**
 
 - Reduced hallucinations through 2 stage verification
 - Higher annotation quality and consistency
