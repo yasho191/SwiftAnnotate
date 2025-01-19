@@ -56,7 +56,7 @@ class BaseImageCaptioning:
         """
         raise NotImplementedError("validate method must be implemented in every subclass")
     
-    def generate(self, image_paths: List[str], **kwargs) -> List[Tuple[str, str, float]]:
+    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         """
         Generates captions for a list of images. Implements the logic to generate captions for a list of images.
 
@@ -68,7 +68,7 @@ class BaseImageCaptioning:
             NotImplementedError: Must be implemented in every subclass.
 
         Returns:
-            List[Tuple[str, str, float]]: List of captions, validation reasoning and confidence scores for each image.
+            List[Dict]: List of captions, validation reasoning and confidence scores for each image.
         """
         raise NotImplementedError("generate method must be implemented in every subclass")
     
@@ -78,6 +78,7 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
         model: str, 
         api_key: str, 
         caption_prompt: str | None = None, 
+        validation: bool = True,
         validation_prompt: str | None = None,
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
@@ -91,6 +92,7 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
             self.caption_prompt = BASE_IMAGE_CAPTION_PROMPT
         self.caption_prompt = caption_prompt
         
+        self.validation = validation
         if validation_prompt is None:
             self.validation_prompt = BASE_IMAGE_CAPTION_VALIDATION_PROMPT
         else:
@@ -216,32 +218,44 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
         results = []
         for image_path in tqdm(image_paths, desc="Generating captions:"):
             image = self.encode_image(image_path)
-            validation_flag = False
-            for _ in range(self.max_retry):
-                caption = self.caption(image, **kwargs)
-                validation_reasoning, confidence = self.validate(image, caption, **kwargs)
-                if confidence > self.validation_threshold:
+            
+            if self.validation:
+                validation_flag = False
+                for _ in range(self.max_retry):
+                    caption = self.caption(image, **kwargs)
+                    validation_reasoning, confidence = self.validate(image, caption, **kwargs)
+                    if confidence > self.validation_threshold:
+                        results.append(
+                            {
+                                "image_path": image_path, 
+                                "image_caption": caption, 
+                                "validation_reasioning":validation_reasoning, 
+                                "validation_score":confidence
+                            }
+                        )
+                        validation_flag = True
+                        break
+                    else:
+                        logging.info(f"Retrying captioning and validation for {image_path} as confidence score {confidence} is below threshold.")
+                
+                if not validation_flag:
+                    logging.info(f"Caption validation failed for {image_path}. Adding to results with CAPTION_FAILED_VALIDATION tag in image_caption.")
                     results.append(
                         {
                             "image_path": image_path, 
-                            "image_caption": caption, 
+                            "image_caption": f"CAPTION_FAILED_VALIDATION: {caption}", 
                             "validation_reasioning":validation_reasoning, 
                             "validation_score":confidence
                         }
                     )
-                    validation_flag = True
-                    break
-                else:
-                    logging.info(f"Retrying captioning and validation for {image_path} as confidence score {confidence} is below threshold.")
-            
-            if not validation_flag:
-                logging.info(f"Caption validation failed for {image_path}. Adding to results with CAPTION_FAILED_VALIDATION tag in image_caption.")
+            else:
+                caption = self.caption(image, **kwargs)
                 results.append(
                     {
                         "image_path": image_path, 
-                        "image_caption": f"CAPTION_FAILED_VALIDATION: {caption}", 
-                        "validation_reasioning":validation_reasoning, 
-                        "validation_score":confidence
+                        "image_caption": caption, 
+                        "validation_reasioning":None, 
+                        "validation_score":None
                     }
                 )
         
