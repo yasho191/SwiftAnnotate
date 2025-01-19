@@ -13,7 +13,7 @@ from swiftannotate.image.utils import encode_image
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
 class ImageValidationOutput(BaseModel):
-    valiadtion_reasoning: str
+    validation_reasoning: str
     confidence: float
 
 class BaseImageCaptioning:
@@ -198,33 +198,27 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
         else:
             user_prompt = "Describe the given image."
         
-        content = [
+        messages=[
+            {"role": "system", "content": self.caption_prompt},
             {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{image}"
-                },
-                "detail": self.detail
-            },
-            {
-                "type": "text",
-                "text": user_prompt,
-            },
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image}",
+                            "detail": self.detail
+                        },
+                    },
+                    {"type": "text", "text": user_prompt},
+                ]
+            }
         ]
         
         try:
             response = self.client.chat.completions.create(
                 model=self.caption_model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.caption_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": content
-                    }
-                ],
+                messages=messages,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 **kwargs
@@ -237,34 +231,34 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
             
         return image_caption
     
-    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
-        content = [
+    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:  
+        messages = [
             {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/jpeg;base64,{image}"
-                },
-                "detail": self.detail
+                "role": "system",
+                "content": self.validation_prompt
             },
             {
-                "type": "text",
-                "text": caption + "\nValidate the caption generated for the given image."
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{image}",
+                            "detail": self.detail
+                        },
+                    },
+                    {
+                        "type": "text",
+                        "text": caption + "\nValidate the caption generated for the given image."
+                    }
+                ]
             }
-        ]
+        ]      
         
         try:
             response = self.client.chat.completions.create(
                 model=self.validation_model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": self.validation_prompt
-                    },
-                    {
-                        "role": "user",
-                        "content": content 
-                    }
-                ],
+                messages=messages,
                 max_tokens=self.max_tokens,
                 temperature=self.temperature,
                 response_format=ImageValidationOutput,
@@ -280,7 +274,6 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
             confidence = 0.0
             
         return validation_reasoning, confidence
-
         
 class ImageCaptionQwen2VL(BaseImageCaptioning):
     def __init__(
@@ -363,11 +356,11 @@ class ImageCaptionQwen2VL(BaseImageCaptioning):
         generated_ids_trimmed = [
             out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
         ]
-        output_text = self.processor.batch_decode(
+        image_caption = self.processor.batch_decode(
             generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
         )[0]
         
-        return output_text
+        return image_caption
     
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
         messages = [
@@ -412,23 +405,23 @@ class ImageCaptionQwen2VL(BaseImageCaptioning):
         generated_ids_trimmed = [
             out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
         ]
-        output_text = self.processor.batch_decode(
+        validation_output = self.processor.batch_decode(
             generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
         )[0]
         
         # TODO: Need a better way to parse the output
         try:
-            output_text = output_text.replace('```', '').replace('json', '')
-            output_text = json.loads(output_text)
-            validation_reasoning = output_text["validation_reasoning"]
-            confidence = output_text["confidence"]
+            validation_output = validation_output.replace('```', '').replace('json', '')
+            validation_output = json.loads(validation_output)
+            validation_reasoning = validation_output["validation_reasoning"]
+            confidence = validation_output["confidence"]
         except Exception as e:
             logging.error(f"Image caption validation parsing failed trying to parse using another logic.")
             
-            number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in output_text)
+            number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in validation_output)
             potential_confidence_scores = [float(i) for i in number_str.split() if float(i) >= 0 and float(i) <= 1]
             confidence = max(potential_confidence_scores) if potential_confidence_scores else 0.0
-            validation_reasoning = output_text
+            validation_reasoning = validation_output
         
         return validation_reasoning, confidence
     
