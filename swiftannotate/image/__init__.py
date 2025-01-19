@@ -1,0 +1,1 @@
+from swiftannotate.image.captioning import ImageCaptioningOpenAI, ImageCaptioningQwen2VL

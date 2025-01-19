@@ -155,7 +155,7 @@ class BaseImageCaptioning:
             
         return results
     
-class ImageCaptionOpenAI(BaseImageCaptioning):
+class ImageCaptioningOpenAI(BaseImageCaptioning):
     def __init__(
         self, 
         caption_model: str, 
@@ -275,7 +275,7 @@ class ImageCaptionOpenAI(BaseImageCaptioning):
             
         return validation_reasoning, confidence
         
-class ImageCaptionQwen2VL(BaseImageCaptioning):
+class ImageCaptioningQwen2VL(BaseImageCaptioning):
     def __init__(
         self, 
         model: str, 
