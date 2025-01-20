@@ -1,6 +1,6 @@
 # SwiftAnnotate 🚀
 
-![SwiftAnnotate](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/swiftannotate-high-resolution-logo.png)
+<img src="assets/swiftannotate-high-resolution-logo.png"/>
 
 SwiftAnnotate is a comprehensive auto-labeling tool designed for Text, Image, and Video data. It leverages state-of-the-art (SOTA) Vision Language Models (VLMs) and Large Language Models (LLMs) through a robust annotator-validator pipeline, ensuring high-quality, grounded annotations while minimizing hallucinations. SwiftAnnotate also supports annotations tasks like Object Detection and Segmentation through SOTA CV models like `SAM2`, `YOLOWorld`, and `OWL-ViT`.
 
@@ -26,7 +26,6 @@ Easily extend and adapt the framework to suit specific project needs. Integrate 
 
 7. **Developer-Friendly 👩‍💻👨‍💻**
 Easy-to-use package and detailed documentation to get started quickly.
-
 
 ## Installation Guide
 
@@ -59,7 +58,7 @@ Make sure you have conda installed on your system. To install SwiftAnnotate, fol
 
 ## Annotator-Validator Pipeline for LLMs and VLMs
 
-![Annotation Pipeline](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/SwiftAnnotatePiepline.png)
+<img src="assets/SwiftAnnotatePiepline.png"/>
 
 The annotator-validator pipeline ensures high-quality annotations through a two-stage process:
 

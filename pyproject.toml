@@ -1,0 +1,37 @@
+[project]
+name = "swiftannotate"
+version = "0.1.0"
+description = "Auto annotation tool for Text, Images, and Videos."
+authors = [
+    {name = "Yashowardhan",email = "yashowardhanshinde@gmail.com"},
+    {name = "Atharv",email = "biradaratharv2802@gmail.com"},
+]
+license = {text = "Apache-2.0"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai (>=1.59.8,<2.0.0)",
+    "google-generativeai (>=0.8.3,<0.9.0)",
+    "qwen-vl-utils (>=0.0.8,<0.0.9)",
+    "numpy (>=2.2.2,<3.0.0)",
+    "pillow (>=11.1.0,<12.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "torch (==2.3.0)",
+    "torchvision (==0.18.0)",
+    "transformers (==4.43.0)",
+    "accelerate (==0.30.0)"
+]
+
+[project.urls]
+Homepage = "https://github.com/yasho191/SwiftAnnotate"
+Repository = "https://github.com/yasho191/SwiftAnnotate"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+accelerate = "0.30.0"
+bitsandbytes = "0.42.0"
+torch = "2.3.0"
+flash_attn = "2.5.8"
