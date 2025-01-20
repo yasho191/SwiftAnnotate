@@ -1,6 +1,6 @@
 # SwiftAnnotate 🚀
 
-<img src="assets/swiftannotate-high-resolution-logo.png"/>
+![swiftannotate](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/swiftannotate-high-resolution-logo.png?raw=True)
 
 SwiftAnnotate is a comprehensive auto-labeling tool designed for Text, Image, and Video data. It leverages state-of-the-art (SOTA) Vision Language Models (VLMs) and Large Language Models (LLMs) through a robust annotator-validator pipeline, ensuring high-quality, grounded annotations while minimizing hallucinations. SwiftAnnotate also supports annotations tasks like Object Detection and Segmentation through SOTA CV models like `SAM2`, `YOLOWorld`, and `OWL-ViT`.
 
@@ -27,38 +27,33 @@ Easily extend and adapt the framework to suit specific project needs. Integrate 
 7. **Developer-Friendly 👩‍💻👨‍💻**
 Easy-to-use package and detailed documentation to get started quickly.
 
-## Installation Guide
+## Installation Guide  
 
-Make sure you have conda installed on your system. To install SwiftAnnotate, follow these steps:
+To install **SwiftAnnotate** from PyPI and set up the project environment, follow these steps:  
 
-1. **Clone the repository**:
+1. **Install from PyPI**  
+
+    Run the following command to install the package directly:  
+
+    ```bash
+    pip install swiftannotate
+    ```
+
+2. **For Development (Using Poetry)**  
+
+    If you want to contribute or explore the project codebase ensure you have Poetry installed.  Follow the steps given below:
 
     ```bash
     git clone https://github.com/yasho191/SwiftAnnotate
-    ```
-
-2. **Create virtual environment**:
-
-    ```bash
-    conda create -n swiftannotate python=3.10
-    conda activate swiftannotate
-    ```
-
-3. **Navigate to the project directory**:
-
-    ```bash
     cd SwiftAnnotate
+    poetry install
     ```
 
-4. **Install dependencies**:
-
-    ```bash
-    pip install -r requirements.txt
-    ```
+    You're now ready to explore and develop SwiftAnnotate!  
 
 ## Annotator-Validator Pipeline for LLMs and VLMs
 
-<img src="assets/SwiftAnnotatePiepline.png"/>
+![Annotation Pipeline](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/SwiftAnnotatePiepline.png?raw=True)
 
 The annotator-validator pipeline ensures high-quality annotations through a two-stage process:
 
