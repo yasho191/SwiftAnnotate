@@ -23,7 +23,7 @@ jobs:
 
       - name: "Install poetry"
         env:
-          POETRY_VERSION: ${{ vars.POETRY_VERSION }}
+          POETRY_VERSION: '2.0.1'
         run: pipx install "poetry==${POETRY_VERSION}"
 
       - name: "Set up Python"
@@ -53,14 +53,14 @@ jobs:
 
       - name: "Install poetry"
         env:
-          POETRY_VERSION: ${{ vars.POETRY_VERSION }}
+          POETRY_VERSION: '2.0.1'
         run: pipx install "poetry==${POETRY_VERSION}"
 
       - name: "Set up Python"
         id: setup_python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.10'
           cache: 'poetry'
 
       - name: Install Python dependencies
