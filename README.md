@@ -43,6 +43,8 @@ Make sure you have conda installed on your system. To install SwiftAnnotate, fol
 
 ## Annotator-Validator Pipeline for LLMs and VLMs
 
+![Annotation Pipeline](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/SwiftAnnotatePiepline.png)
+
 The annotator-validator pipeline ensures high-quality annotations through a two-stage process:
 
 **Stage 1: Annotation**
