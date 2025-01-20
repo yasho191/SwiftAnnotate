@@ -15,9 +15,9 @@ on:
 
 jobs:
   build:
-    name: "Build"
+    name: "Build and Deploy"
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'  # Run this job for pull requests only
+    if: github.event_name == 'pull_request' || github.event_name == 'push'  # Run this job for pull requests only
     steps:
       - uses: actions/checkout@v4
 
@@ -41,33 +41,4 @@ jobs:
         run: |
           cd docs/
           poetry run mkdocs build
-
-  upload:
-    name: "Upload"
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Run this job for pushes to the main branch only
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Install poetry"
-        env:
-          POETRY_VERSION: '2.0.1'
-        run: pipx install "poetry==${POETRY_VERSION}"
-
-      - name: "Set up Python"
-        id: setup_python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'poetry'
-
-      - name: Install Python dependencies
-        run: |
-          poetry install
-
-      - name: Deploy docs
-        run: |
-          cd docs/
           poetry run mkdocs gh-deploy --force
