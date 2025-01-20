@@ -19,7 +19,7 @@ dependencies = [
     "torch (==2.3.0)",
     "torchvision (==0.18.0)",
     "transformers (==4.43.0)",
-    "accelerate (==0.30.0)"
+    "accelerate (==0.30.0)",
 ]
 
 [project.urls]
@@ -34,4 +34,10 @@ build-backend = "poetry.core.masonry.api"
 accelerate = "0.30.0"
 bitsandbytes = "0.42.0"
 torch = "2.3.0"
-flash_attn = "2.5.8"
+notebook = "^7.3.2"
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.6.1"
+mkdocs-jupyter = "^0.25.1"
+mkdocs-material = "^9.5.50"
+mkdocstrings-python = "^1.13.0"
