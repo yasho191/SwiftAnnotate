@@ -1,5 +1,6 @@
 from tqdm import tqdm
 import logging
+from typing_extensions import TypedDict
 from PIL import Image
 import json
 from pydantic import BaseModel
@@ -163,8 +164,23 @@ class BaseImageCaptioning(BaseImageAnnotation):
             if self.validation:
                 validation_flag = False
                 for _ in range(self.max_retry):
+                    
+                    # Generate caption
                     caption = self.annotate(image, **kwargs)
-                    validation_reasoning, confidence = self.validate(image, caption, **kwargs)
+                    caption_retry_counter = 0
+                    while caption == "ERROR" and caption_retry_counter < 5:
+                        logging.info(f"Retrying captioning for {image_path} as an error occurred.")
+                        caption = self.annotate(image, **kwargs)
+                        caption_retry_counter += 1
+                    
+                    # Validate caption
+                    validation_reasoning, confidence = self.validate(image, caption, **kwargs) 
+                    validation_retry_counter = 0
+                    while validation_reasoning == "ERROR" and confidence == 0 and validation_retry_counter < 5:
+                        logging.info(f"Retrying caption validation for {image_path} as an error occurred.")
+                        validation_reasoning, confidence = self.validate(image, caption, **kwargs)
+                        validation_retry_counter += 1
+                        
                     if confidence > self.validation_threshold:
                         results.append(
                             {
@@ -212,6 +228,10 @@ class BaseImageCaptioning(BaseImageAnnotation):
 #     Pydantic Models for Stuctured Output     #
 ################################################
 
-class ImageValidationOutput(BaseModel):
+class ImageValidationOutputOpenAI(BaseModel):
+    validation_reasoning: str
+    confidence: float
+
+class ImageValidationOutputGemini(TypedDict):
     validation_reasoning: str
     confidence: float

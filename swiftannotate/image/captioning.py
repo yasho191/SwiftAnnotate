@@ -5,7 +5,8 @@ import logging
 import json
 from typing import Tuple
 from qwen_vision_utils import process_vision_info
-from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutput
+from transformers import AutoProcessor, AutoModelForImageTextToText
+from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutputOpenAI, ImageValidationOutputGemini
 
     
 class ImageCaptioningOpenAI(BaseImageCaptioning):
@@ -80,7 +81,10 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
             
         return image_caption
     
-    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:  
+    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]: 
+        if caption == "ERROR":
+            return "ERROR", 0
+         
         messages = [
             {
                 "role": "system",
@@ -108,7 +112,7 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
             response = self.client.chat.completions.create(
                 model=self.validation_model,
                 messages=messages,
-                response_format=ImageValidationOutput,
+                response_format=ImageValidationOutputOpenAI,
                 **kwargs
             )
             validation_output = response.choices[0].message.parsed
@@ -118,7 +122,7 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
         except Exception as e:
             logging.error(f"Image caption validation failed: {e}")
             validation_reasoning = "ERROR"
-            confidence = 0.0
+            confidence = 0
             
         return validation_reasoning, confidence
 
@@ -149,20 +153,71 @@ class ImageCaptioningGemini(BaseImageCaptioning):
             output_file=output_file
         )
     
-    # TODO: Implement Gemini captioning 
     def annotate(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
-        raise NotImplementedError("Gemini not supported yet.")
+        
+        if feedback_prompt:
+            user_prompt = f"""
+                Last time the caption you generated for this image was incorrect because of the following reasons:
+                {feedback_prompt}
+                
+                Try to generate a better caption for the image.
+            """
+        else:
+            user_prompt = "Describe the given image."
+            
+        messages = [
+            self.caption_prompt,
+            {'mime_type':'image/jpeg', 'data': image}, 
+            user_prompt
+        ]
+        
+        try:
+            image_caption = self.caption_model.generate_content(
+                messages,
+                generation_config=genai.GenerationConfig(
+                    **kwargs
+                )
+            )
+        except Exception as e:
+            logging.error(f"Image captioning failed: {e}")
+            image_caption = "ERROR"
+        
+        return image_caption
 
-    # TODO: Implement Gemini validation
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
-        raise NotImplementedError("Gemini not supported yet.")    
+        if caption == "ERROR":
+            return "ERROR", 0.0
+
+        messages = [
+            self.validation_prompt,
+            {'mime_type':'image/jpeg', 'data': image},
+            caption,
+            "Validate the caption generated for the given image."
+        ]
+        
+        try:
+            validation_output = self.validation_model.generate_content(
+                messages,
+                generation_config=genai.GenerationConfig(
+                    response_mime_type="application/json", 
+                    response_schema=ImageValidationOutputGemini
+                )
+            )
+            validation_reasoning = validation_output["validation_reasoning"]
+            confidence = validation_output["confidence"]
+        except Exception as e:
+            logging.error(f"Image caption validation failed: {e}")
+            validation_reasoning = "ERROR"
+            confidence = 0.0
+        
+        return validation_reasoning, confidence        
     
     
 class ImageCaptioningQwen2VL(BaseImageCaptioning):
     def __init__(
         self, 
-        model: str, 
-        processor: str,
+        model: AutoModelForImageTextToText, 
+        processor: AutoProcessor,
         caption_prompt: str | None = None, 
         validation: bool = True,
         validation_prompt: str | None = None,
@@ -186,11 +241,6 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         
         self.resize_height = kwargs.get("resize_height", 280)
         self.resize_width = kwargs.get("resize_width", 420)
-        
-        # TODO: Add logic only if not supported by Qwen2VL vision processor
-        # Round off height and width to nearest multiple of 28
-        # self.resize_height = round(self.resize_height / 28) * 28
-        # self.resize_width = round(self.resize_width / 28) * 28
 
     def annotate(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
         
@@ -246,6 +296,7 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         return image_caption
     
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
+        
         messages = [
             {"role": "system", "content": self.validation_prompt},
             {
