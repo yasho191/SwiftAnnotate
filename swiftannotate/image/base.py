@@ -3,6 +3,7 @@ import logging
 from typing_extensions import TypedDict
 from PIL import Image
 import json
+from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import List, Tuple, Dict
 
@@ -11,65 +12,36 @@ from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT,
 from swiftannotate.image.utils import encode_image
 
 
-class BaseImageAnnotation:
+class BaseImageAnnotation(ABC):
     """
     Base class for image annotation. The class provides a blueprint for all image annotation models.
     Each base class must implement the following methods:
     - annotate: generates annotations for an image
     - validate: validates annotations for an image
-    
-    The class also provides a default method to generate annotations for a list of images:
     - generate: generates and saves annotations for a list of images
     """
     
+    @abstractmethod
     def annotate(self, image: Image.Image | str, feedback_prompt: str = "", **kwargs) -> List[str]:
         """
         Generates annotations for an image. Implements the logic to generate annotations for an image.
-
-        Args:
-            image (PIL.Image.Image, str): Image to generate annotations for. Can be a PIL Image or base64 encoded image depending on the model.
-            **kwargs: Additional arguments to pass to the method for API calls.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            List[str]: List of annotations for the image.
         """
-        raise NotImplementedError("annotate method must be implemented in every subclass")
+        pass
 
+    @abstractmethod
     def validate(self, image: Image.Image | str, annotation: List[str], **kwargs) -> Tuple[str, float]:
         """
         Validates annotations for an image. Implements the logic to validate annotations for an image.
-
-        Args:
-            image (PIL.Image.Image, str): Image to validate the annotations for. Can be a PIL Image or base64 encoded image depending on the model.
-            annotations (List[str]): Generated annotations for the image.
-            **kwargs: Additional arguments to pass to the method for API calls.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            Tuple[str, float]: Returns validation logic and confidence score ranging 0-1.
         """
-        raise NotImplementedError("validate method must be implemented in every subclass")
+        pass
     
+    @abstractmethod
     def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         """
         Generates annotations for a list of images. Implements the logic to generate annotations for a list of images.
-
-        Args:
-            image_paths (List[str]): List of image paths to generate annotations for.
-            **kwargs: Additional arguments to pass to the method for custom pipeline interactions.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            List[Dict]: List of annotations for each image.
         """
-        raise NotImplementedError("generate method must be implemented in every subclass")
+        pass
+
 
 # Image Captioning Base Class
 class BaseImageCaptioning(BaseImageAnnotation):
@@ -79,7 +51,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
     - caption: generates a caption for an image
     - validate: validates a caption for an image
     
-    The class also provides a default method to generate captions for a list of images:
+    The class provides a default method to generate captions for a list of images:
     - generate: generates captions for a list of images
     """
     
@@ -113,38 +85,19 @@ class BaseImageCaptioning(BaseImageAnnotation):
         else:
             raise ValueError("Output file must be a either None or a JSON file.")
     
-    def annotate(self, image: Image.Image | str, feedback_prompt: str = "", **kwargs) -> str:
+    @abstractmethod
+    def annotate(self, image: str, feedback_prompt: str = "", **kwargs) -> str:
         """
         Generates a caption for an image. Implements the logic to generate a caption for an image.
-
-        Args:
-            image (PIL.Image.Image, str): Image to validate the caption for. Can be a PIL Image or base64 encoded image depending on the model.
-            **kwargs: Additional arguments to pass to the method for API calls.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            str: Caption of the image.
         """
-        raise NotImplementedError("caption method must be implemented in every subclass")
+        pass
     
-    def validate(self, image: Image.Image | str, caption: str, **kwargs) -> Tuple[str, float]:
+    @abstractmethod
+    def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
         """
         Validates a caption for an image. Implements the logic to validate a caption for an image.
-
-        Args:
-            image (PIL.Image.Image, str): Image to validate the caption for. Can be a PIL Image or base64 encoded image depending on the model.
-            caption (str): Generated caption for the image.
-            **kwargs: Additional arguments to pass to the method for API calls.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            Tuple[str, float]: Returns validation logic and confidence score ranging 0-1.
         """
-        raise NotImplementedError("validate method must be implemented in every subclass")
+        pass
     
     def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         """
@@ -152,10 +105,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
 
         Args:
             image_paths (List[str]): List of image paths to generate captions for.
-            **kwargs: Additional arguments to pass to the method for custom pipeline interactions.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
 
         Returns:
             List[Dict]: List of captions, validation reasoning and confidence scores for each image.
@@ -235,7 +185,7 @@ class BaseImageClassification(BaseImageAnnotation):
     - classify: generates a classification for an image
     - validate: validates a classification for an image
     
-    The class also provides a default method to generate classifications for a list of images:
+    The class provides a default method to generate classifications for a list of images:
     - generate: generates classifications for a list of images
     """
     
@@ -269,38 +219,19 @@ class BaseImageClassification(BaseImageAnnotation):
         else:
             raise ValueError("Output file must be a either None or a JSON file.")
     
+    @abstractmethod
     def annotate(self, image: Image.Image | str, feedback_prompt: str = "", **kwargs) -> List[str]:
         """
         Generates a classification for an image. Implements the logic to generate a classification for an image.
-
-        Args:
-            image (PIL.Image.Image, str): Image to validate the classification for. Can be a PIL Image or base64 encoded image depending on the model.
-            **kwargs: Additional arguments to pass to the method for API calls.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            List[str]: List of classification labels for the image.
         """
-        raise NotImplementedError("classify method must be implemented in every subclass")
+        pass
     
+    @abstractmethod
     def validate(self, image: Image.Image | str, classification: List[str], **kwargs) -> Tuple[str, float]:
         """
         Validates a classification for an image. Implements the logic to validate a classification for an image.
-
-        Args:
-            image (PIL.Image.Image, str): Image to validate the classification for. Can be a PIL Image or base64 encoded image depending on the model.
-            classification (List[str]): Generated classification labels for the image.
-            **kwargs: Additional arguments to pass to the method for API calls.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
-
-        Returns:
-            Tuple[str, float]: Returns validation logic and confidence score ranging 0-1.
         """
-        raise NotImplementedError("validate method must be implemented in every subclass")
+        pass
     
     def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         """
@@ -308,10 +239,7 @@ class BaseImageClassification(BaseImageAnnotation):
 
         Args:
             image_paths (List[str]): List of image paths to generate classifications for.
-            **kwargs: Additional arguments to pass to the method for custom pipeline interactions.
-
-        Raises:
-            NotImplementedError: Must be implemented in every subclass.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
 
         Returns:
             List[Dict]: List of classifications, validation reasoning and confidence scores for each image.
@@ -382,6 +310,7 @@ class BaseImageClassification(BaseImageAnnotation):
         
         return results
 
+
 ################################################
 #     Pydantic Models for Stuctured Output     #
 ################################################
@@ -389,6 +318,7 @@ class BaseImageClassification(BaseImageAnnotation):
 class ImageValidationOutputOpenAI(BaseModel):
     validation_reasoning: str
     confidence: float
+
 
 class ImageValidationOutputGemini(TypedDict):
     validation_reasoning: str

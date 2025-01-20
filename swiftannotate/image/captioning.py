@@ -3,7 +3,8 @@ from openai import OpenAI
 import google.generativeai as genai
 import logging
 import json
-from typing import Tuple
+from tqdm import tqdm
+from typing import Tuple, List, Dict
 from qwen_vision_utils import process_vision_info
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutputOpenAI, ImageValidationOutputGemini
@@ -126,6 +127,24 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
             
         return validation_reasoning, confidence
 
+    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
+        """
+        Generates captions for a list of images. Implements the logic to generate captions for a list of images.
+
+        Args:
+            image_paths (List[str]): List of image paths to generate captions for.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
+
+        Returns:
+            List[Dict]: List of captions, validation reasoning and confidence scores for each image.
+        """
+        results = super().generate(
+            image_paths=image_paths, 
+            **kwargs
+        )
+        
+        return results
+
 class ImageCaptioningGemini(BaseImageCaptioning):
     def __init__(
         self, 
@@ -210,7 +229,26 @@ class ImageCaptioningGemini(BaseImageCaptioning):
             validation_reasoning = "ERROR"
             confidence = 0.0
         
-        return validation_reasoning, confidence        
+        return validation_reasoning, confidence
+    
+    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
+        """
+        Generates captions for a list of images. Implements the logic to generate captions for a list of images.
+
+        Args:
+            image_paths (List[str]): List of image paths to generate captions for.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
+
+        Returns:
+            List[Dict]: List of captions, validation reasoning and confidence scores for each image.
+        """
+
+        results = super().generate(
+            image_paths=image_paths, 
+            **kwargs
+        )
+        
+        return results 
     
     
 class ImageCaptioningQwen2VL(BaseImageCaptioning):
@@ -359,3 +397,20 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         
         return validation_reasoning, confidence
     
+    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
+        """
+        Generates captions for a list of images. Implements the logic to generate captions for a list of images.
+
+        Args:
+            image_paths (List[str]): List of image paths to generate captions for.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
+
+        Returns:
+            List[Dict]: List of captions, validation reasoning and confidence scores for each image.
+        """
+        results = super().generate(
+            image_paths=image_paths, 
+            **kwargs
+        )
+        
+        return results
