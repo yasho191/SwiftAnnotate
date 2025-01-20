@@ -1,0 +1,81 @@
+site_name: SwiftAnnotate
+site_url: https://yasho191.github.io/SwiftAnnotate/
+
+repo_url: https://github.com/yasho191/SwiftAnnotate
+edit_uri: https://github.com/yasho191/SwiftAnnotate/tree/main/docs/docs
+
+repo_name: yasho191/SwiftAnnotate
+docs_dir: src
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  language: en
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+      primary: dark purple
+      accent: purple
+
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: dark purple
+      accent: purple 
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate 
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference   
+      primary: dark purple
+      accent: purple
+  favicon: images/rocket.png
+  icon:
+    logo: material/rocket-launch
+
+plugins:
+  - search
+  - autorefs
+  - mkdocs-jupyter
+  - mkdocstrings
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+copyright: |
+  &copy; 2025 <a href="https://github.com/yasho191/SwiftAnnotate"  target="_blank" rel="noopener">SwiftAnnotate</a>
+
+
+nav:
+  - Home: 'index.md'
+  - image.md
+  - text.md
+  - video.md

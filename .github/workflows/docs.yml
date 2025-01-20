@@ -1,0 +1,73 @@
+name: "Docs"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'swiftannotate/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'swiftannotate/**'
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'  # Run this job for pull requests only
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Install poetry"
+        env:
+          POETRY_VERSION: ${{ vars.POETRY_VERSION }}
+        run: pipx install "poetry==${POETRY_VERSION}"
+
+      - name: "Set up Python"
+        id: setup_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'poetry'
+
+      - name: Install Python dependencies
+        run: |
+          poetry install --sync
+
+      - name: Build MkDocs site
+        run: |
+          cd docs/
+          poetry run mkdocs build
+
+  upload:
+    name: "Upload"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'  # Run this job for pushes to the main branch only
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Install poetry"
+        env:
+          POETRY_VERSION: ${{ vars.POETRY_VERSION }}
+        run: pipx install "poetry==${POETRY_VERSION}"
+
+      - name: "Set up Python"
+        id: setup_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'poetry'
+
+      - name: Install Python dependencies
+        run: |
+          poetry install --sync
+
+      - name: Deploy docs
+        run: |
+          cd docs/
+          poetry run mkdocs gh-deploy --force
