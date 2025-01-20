@@ -1,10 +1,10 @@
-# SwiftAnnotate
+# SwiftAnnotate 🚀
 
 ![SwiftAnnotate](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/swiftannotate-high-resolution-logo.png)
 
 SwiftAnnotate is a comprehensive auto-labeling tool designed for Text, Image, and Video data. It leverages state-of-the-art (SOTA) Vision Language Models (VLMs) and Large Language Models (LLMs) through a robust annotator-validator pipeline, ensuring high-quality, grounded annotations while minimizing hallucinations. SwiftAnnotate also supports annotations tasks like Object Detection and Segmentation through SOTA CV models like `SAM2`, `YOLOWorld`, and `OWL-ViT`.
 
-## Key Features 🚀
+## Key Features 🎯
 
 1. **Text Processing 📝**  
 Perform **classification**, **summarization**, and **text generation** with state-of-the-art NLP models. Solve real-world problems like spam detection, sentiment analysis, and content creation.
