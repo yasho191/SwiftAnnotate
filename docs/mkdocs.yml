@@ -2,7 +2,7 @@ site_name: SwiftAnnotate
 site_url: https://yasho191.github.io/SwiftAnnotate/
 
 repo_url: https://github.com/yasho191/SwiftAnnotate
-edit_uri: https://github.com/yasho191/SwiftAnnotate/tree/main/docs/docs
+edit_uri: https://github.com/yasho191/SwiftAnnotate/tree/main/docs/src
 
 repo_name: yasho191/SwiftAnnotate
 docs_dir: src
@@ -22,30 +22,28 @@ theme:
   language: en
   palette:
     - media: "(prefers-color-scheme)"
+      scheme: auto
       toggle:
         icon: material/brightness-auto
         name: Switch to light mode
-      primary: dark purple
-      accent: purple
 
     - media: "(prefers-color-scheme: light)"
-      scheme: default
+      scheme: swift
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
-      primary: dark purple
-      accent: purple 
 
     - media: "(prefers-color-scheme: dark)"
       scheme: slate 
       toggle:
         icon: material/brightness-4
         name: Switch to system preference   
-      primary: dark purple
-      accent: purple
   favicon: images/rocket.png
   icon:
     logo: material/rocket-launch
+
+extra_css:
+  - stylesheets/extra.css
 
 plugins:
   - search
