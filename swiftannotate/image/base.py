@@ -186,6 +186,7 @@ class BaseImageClassification(BaseImageAnnotation):
     
     def __init__(
         self, 
+        classification_labels: List[str],
         classification_prompt: str, 
         validation: bool,
         validation_prompt: str,
@@ -194,6 +195,8 @@ class BaseImageClassification(BaseImageAnnotation):
         output_file: str | None = None,
         **kwargs
     ):
+        assert len(classification_labels) > 1, "classification_labels must be a list of strings with at least two labels."
+        self.classification_labels = [label.lower() for label in classification_labels]
         self.classification_prompt = classification_prompt
         
         self.validation = validation
@@ -313,3 +316,11 @@ class ImageValidationOutputOpenAI(BaseModel):
 class ImageValidationOutputGemini(TypedDict):
     validation_reasoning: str
     confidence: float
+    
+
+class ImageClassificationOutputOpenAI(BaseModel):
+    class_label: str
+
+
+class ImageClassificationOutputGemini(TypedDict):
+    class_label: str

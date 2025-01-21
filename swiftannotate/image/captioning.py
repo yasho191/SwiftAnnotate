@@ -13,7 +13,7 @@ from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_I
 
 class ImageCaptioningOpenAI(BaseImageCaptioning):
     """
-    Image captioning pipeline using OpenAI API. Implements the logic to generate and validate captions for a list of images using OpenAI API.
+    Image captioning pipeline using OpenAI API.
     """
     def __init__(
         self, 
@@ -208,6 +208,7 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
         )
         
         return results
+
 
 class ImageCaptioningGemini(BaseImageCaptioning):
     def __init__(
