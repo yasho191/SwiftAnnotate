@@ -6,11 +6,12 @@ import json
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import List, Tuple, Dict
-
-from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
-from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 from swiftannotate.image.utils import encode_image
 
+
+##################################################
+#     Base Models for Image Annotation Tasks     #
+##################################################
 
 class BaseImageAnnotation(ABC):
     """
@@ -57,47 +58,41 @@ class BaseImageCaptioning(BaseImageAnnotation):
     
     def __init__(
         self, 
-        caption_prompt: str | None = None, 
-        validation: bool = True,
-        validation_prompt: str | None = None,
-        validation_threshold: float = 0.5,
-        max_retry: int = 3, 
+        caption_prompt: str, 
+        validation: bool,
+        validation_prompt: str,
+        validation_threshold: float,
+        max_retry: int, 
         output_file: str | None = None,
-        **kwargs
     ):
-        if caption_prompt is None:
-            self.caption_prompt = BASE_IMAGE_CAPTION_PROMPT
         self.caption_prompt = caption_prompt
         
         self.validation = validation
-        if validation_prompt is None:
-            self.validation_prompt = BASE_IMAGE_CAPTION_VALIDATION_PROMPT
-        else:
-            self.validation_prompt = validation_prompt
-            
+        self.validation_prompt = validation_prompt    
         self.validation_threshold = validation_threshold
+        
         self.max_retry = max_retry
+        assert self.max_retry > 0, "max_retry must be greater than 0."
         
         if output_file is None:
-            self.output_file = None
-        elif output_file.endswith(".json"):
-            self.output_file = output_file
+            self.output_file = None  
         else:
-            raise ValueError("Output file must be a either None or a JSON file.")
+            assert output_file.endswith(".json") == True, "Output file must be a either None or a JSON file."
+            self.output_file = output_file
     
     @abstractmethod
     def annotate(self, image: str, feedback_prompt: str = "", **kwargs) -> str:
         """
         Generates a caption for an image. Implements the logic to generate a caption for an image.
         """
-        pass
+        raise NotImplementedError("annotate method must be implemented in every subclass.")
     
     @abstractmethod
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
         """
         Validates a caption for an image. Implements the logic to validate a caption for an image.
         """
-        pass
+        raise NotImplementedError("validate method must be implemented in every subclass.")
     
     def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         """
@@ -191,47 +186,42 @@ class BaseImageClassification(BaseImageAnnotation):
     
     def __init__(
         self, 
-        classification_prompt: str | None = None, 
-        validation: bool = True,
-        validation_prompt: str | None = None,
-        validation_threshold: float = 0.5,
-        max_retry: int = 3, 
+        classification_prompt: str, 
+        validation: bool,
+        validation_prompt: str,
+        validation_threshold: float,
+        max_retry: int, 
         output_file: str | None = None,
         **kwargs
     ):
-        if classification_prompt is None:
-            self.caption_prompt = BASE_IMAGE_CLASSIFICATION_PROMPT
-        self.caption_prompt = classification_prompt
+        self.classification_prompt = classification_prompt
         
         self.validation = validation
-        if validation_prompt is None:
-            self.validation_prompt = BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT
-        else:
-            self.validation_prompt = validation_prompt
-            
+        self.validation_prompt = validation_prompt  
         self.validation_threshold = validation_threshold
+        
         self.max_retry = max_retry
+        assert self.max_retry > 0, "max_retry must be greater than 0."
         
         if output_file is None:
-            self.output_file = None
-        elif output_file.endswith(".json"):
-            self.output_file = output_file
+            self.output_file = None  
         else:
-            raise ValueError("Output file must be a either None or a JSON file.")
+            assert output_file.endswith(".json") == True, "Output file must be a either None or a JSON file."
+            self.output_file = output_file
     
     @abstractmethod
     def annotate(self, image: Image.Image | str, feedback_prompt: str = "", **kwargs) -> List[str]:
         """
         Generates a classification for an image. Implements the logic to generate a classification for an image.
         """
-        pass
+        raise NotImplementedError("annotate method must be implemented in every subclass.")
     
     @abstractmethod
     def validate(self, image: Image.Image | str, classification: List[str], **kwargs) -> Tuple[str, float]:
         """
         Validates a classification for an image. Implements the logic to validate a classification for an image.
         """
-        pass
+        raise NotImplementedError("validate method must be implemented in every subclass.")
     
     def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
         """

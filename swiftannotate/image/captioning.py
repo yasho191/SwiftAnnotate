@@ -8,22 +8,63 @@ from typing import Tuple, List, Dict
 from qwen_vision_utils import process_vision_info
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutputOpenAI, ImageValidationOutputGemini
+from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
-    
+
 class ImageCaptioningOpenAI(BaseImageCaptioning):
+    """
+    Image captioning pipeline using OpenAI API. Implements the logic to generate and validate captions for a list of images using OpenAI API.
+    """
     def __init__(
         self, 
         caption_model: str, 
         validation_model: str,
         api_key: str, 
-        caption_prompt: str | None = None, 
+        caption_prompt: str = BASE_IMAGE_CAPTION_PROMPT, 
         validation: bool = True,
-        validation_prompt: str | None = None,
+        validation_prompt: str = BASE_IMAGE_CAPTION_VALIDATION_PROMPT,
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
         output_file: str | None = None,
         **kwargs
     ):
+        """
+        Initializes the ImageCaptioningOpenAI pipeline.
+
+        Args:
+            caption_model (str): 
+                Can be either "gpt-4o", "gpt-4o-mini", etc. or 
+                specific versions of model supported by OpenAI.
+            validation_model (str): 
+                Can be either "gpt-4o", "gpt-4o-mini", etc. or 
+                specific versions of model supported by OpenAI.
+            api_key (str): OpenAI API key.
+            caption_prompt (str | None, optional): 
+                System prompt for captioning images.
+                Uses default BASE_IMAGE_CAPTION_PROMPT prompt if not provided.
+            validation (bool, optional): 
+                Use validation step or not. Defaults to True.
+            validation_prompt (str | None, optional): 
+                System prompt for validating image captions should specify the range of validation score to be generated. 
+                Uses default BASE_IMAGE_CAPTION_PROMPT prompt if not provided.
+            validation_threshold (float, optional): 
+                Threshold to determine if image caption is valid or not should be within specified range for validation score. 
+                Defaults to 0.5.
+            max_retry (int, optional):
+                Number of retries before giving up on the image caption. 
+                Defaults to 3.
+            output_file (str | None, optional): 
+                Output file path, only JSON is supported for now. 
+                Defaults to None.
+        
+        Keyword Arguments:
+            detail (str, optional): 
+                Specific to OpenAI. Detail level of the image (Higher resolution costs more). Defaults to "low".
+        
+        Notes:
+            `validation_prompt` should specify the rules for validating the caption and the range of validation score to be generated example (0-1).
+            Your `validation_threshold` should be within this specified range.
+        """
         self.caption_model = caption_model
         self.validation_model = validation_model
         self.client = OpenAI(api_key)
@@ -39,8 +80,21 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
         
         self.detail = kwargs.get("detail", "low")
           
-    def annotate(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
+    def annotate(self, image: str, feedback_prompt:str = "", **kwargs) -> str:        
+        """
+        Annotates the image with a caption. Implements the logic to generate captions for an image.
         
+        **Note**: The feedback_prompt is dynamically updated using the validation reasoning from 
+        the previous iteration in case the caption does not pass validation threshold.
+        
+        Args:
+            image (str): Base64 encoded image.
+            feedback_prompt (str, optional): Feedback prompt for the user to generate a better caption. Defaults to ''.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
+        
+        Returns:
+            str: Generated caption for the image.
+        """
         if feedback_prompt:
             user_prompt = f"""
                 Last time the caption you generated for this image was incorrect because of the following reasons:
@@ -83,6 +137,16 @@ class ImageCaptioningOpenAI(BaseImageCaptioning):
         return image_caption
     
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]: 
+        """
+        Validates the caption generated for the image.
+
+        Args:
+            image (str): Base64 encoded image.
+            caption (str): Caption generated for the image.
+
+        Returns:
+            Tuple[str, float]: Validation reasoning and confidence score for the caption.
+        """
         if caption == "ERROR":
             return "ERROR", 0
          
@@ -157,8 +221,39 @@ class ImageCaptioningGemini(BaseImageCaptioning):
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
         output_file: str | None = None,
-        **kwargs
     ):
+        """
+        Initializes the ImageCaptioningGemini pipeline.
+
+        Args:
+            caption_model (str): 
+                Can be either "gemini-1.5-flash", "gemini-1.5-pro", etc. or specific versions of model supported by Gemini.
+            validation_model (str): 
+                Can be either "gemini-1.5-flash", "gemini-1.5-pro", etc. or specific versions of model supported by Gemini.
+            api_key (str): 
+                Google Gemini API key.
+            caption_prompt (str | None, optional): 
+                System prompt for captioning images.
+                Uses default BASE_IMAGE_CAPTION_PROMPT prompt if not provided.
+            validation (bool, optional): 
+                Use validation step or not. Defaults to True.
+            validation_prompt (str | None, optional): 
+                System prompt for validating image captions should specify the range of validation score to be generated. 
+                Uses default BASE_IMAGE_CAPTION_PROMPT prompt if not provided.
+            validation_threshold (float, optional): 
+                Threshold to determine if image caption is valid or not should be within specified range for validation score. 
+                Defaults to 0.5.
+            max_retry (int, optional):
+                Number of retries before giving up on the image caption. 
+                Defaults to 3.
+            output_file (str | None, optional): 
+                Output file path, only JSON is supported for now. 
+                Defaults to None.
+        
+        Notes:
+            `validation_prompt` should specify the rules for validating the caption and the range of validation score to be generated example (0-1).
+            Your `validation_threshold` should be within this specified range.
+        """        
         genai.configure(api_key=api_key)
         self.caption_model = genai.GenerativeModel(model=caption_model)
         self.validation_model = genai.GenerativeModel(model=validation_model)
@@ -173,7 +268,20 @@ class ImageCaptioningGemini(BaseImageCaptioning):
         )
     
     def annotate(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
+        """
+        Annotates the image with a caption. Implements the logic to generate captions for an image.
         
+        **Note**: The feedback_prompt is dynamically updated using the validation reasoning from 
+        the previous iteration in case the caption does not pass validation threshold.
+        
+        Args:
+            image (str): Base64 encoded image.
+            feedback_prompt (str, optional): Feedback prompt for the user to generate a better caption. Defaults to ''.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
+        
+        Returns:
+            str: Generated caption for the image.
+        """
         if feedback_prompt:
             user_prompt = f"""
                 Last time the caption you generated for this image was incorrect because of the following reasons:
@@ -204,6 +312,16 @@ class ImageCaptioningGemini(BaseImageCaptioning):
         return image_caption
 
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
+        """
+        Validates the caption generated for the image.
+
+        Args:
+            image (str): Base64 encoded image.
+            caption (str): Caption generated for the image.
+
+        Returns:
+            Tuple[str, float]: Validation reasoning and confidence score for the caption.
+        """
         if caption == "ERROR":
             return "ERROR", 0.0
 
@@ -252,6 +370,9 @@ class ImageCaptioningGemini(BaseImageCaptioning):
     
     
 class ImageCaptioningQwen2VL(BaseImageCaptioning):
+    """
+    Image captioning pipeline using Qwen2VL model.
+    """
     def __init__(
         self, 
         model: AutoModelForImageTextToText, 
@@ -263,10 +384,46 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         max_retry: int = 3, 
         output_file: str | None = None,
         **kwargs
-    ):
+    ):     
+        """
+        Initializes the ImageCaptioningQwen2VL pipeline.
+
+        Args:
+            model (AutoModelForImageTextToText): 
+                Model for image captioning. Should be an instance of AutoModelForImageTextToText with Qwen2-VL pretrained weights.
+                Can be any version of Qwen2-VL model (7B, 72B).
+            processor (AutoProcessor): 
+                Processor for the Qwen2-VL model. Should be an instance of AutoProcessor.
+            caption_prompt (str | None, optional): 
+                System prompt for captioning images.
+                Uses default BASE_IMAGE_CAPTION_PROMPT prompt if not provided.
+            validation (bool, optional): 
+                Use validation step or not. Defaults to True.
+            validation_prompt (str | None, optional): 
+                System prompt for validating image captions should specify the range of validation score to be generated. 
+                Uses default BASE_IMAGE_CAPTION_PROMPT prompt if not provided.
+            validation_threshold (float, optional): 
+                Threshold to determine if image caption is valid or not should be within specified range for validation score. 
+                Defaults to 0.5.
+            max_retry (int, optional):
+                Number of retries before giving up on the image caption. 
+                Defaults to 3.
+            output_file (str | None, optional): 
+                Output file path, only JSON is supported for now. 
+                Defaults to None.
+        
+        Keyword Arguments:
+            resize_height (int, optional):
+                Height to resize the image before generating captions. Defaults to 280.
+            resize_width (int, optional):
+                Width to resize the image before generating captions. Defaults to 420.
+        
+        Notes:
+            `validation_prompt` should specify the rules for validating the caption and the range of validation score to be generated example (0-1).
+            Your `validation_threshold` should be within this specified range.
+        """     
         self.model = model
         self.processor = processor
-        self.max_retry = max_retry
         
         super().__init__(
             caption_prompt=caption_prompt,
@@ -281,7 +438,20 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         self.resize_width = kwargs.get("resize_width", 420)
 
     def annotate(self, image: str, feedback_prompt:str = "", **kwargs) -> str:
+        """
+        Annotates the image with a caption. Implements the logic to generate captions for an image.
         
+        **Note**: The feedback_prompt is dynamically updated using the validation reasoning from 
+        the previous iteration in case the caption does not pass validation threshold.
+        
+        Args:
+            image (str): Base64 encoded image.
+            feedback_prompt (str, optional): Feedback prompt for the user to generate a better caption. Defaults to ''.
+            **kwargs: Additional arguments to pass to the method for custom pipeline interactions. To control generation parameters for the model.
+        
+        Returns:
+            str: Generated caption for the image.
+        """
         if feedback_prompt:
             user_prompt = f"""
                 Last time the caption you generated for this image was incorrect because of the following reasons:
@@ -334,7 +504,16 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         return image_caption
     
     def validate(self, image: str, caption: str, **kwargs) -> Tuple[str, float]:
-        
+        """
+        Validates the caption generated for the image.
+
+        Args:
+            image (str): Base64 encoded image.
+            caption (str): Caption generated for the image.
+
+        Returns:
+            Tuple[str, float]: Validation reasoning and confidence score for the caption.
+        """
         messages = [
             {"role": "system", "content": self.validation_prompt},
             {
