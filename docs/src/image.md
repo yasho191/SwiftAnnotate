@@ -2,9 +2,7 @@
 
 ## Captioning
 
-::: swiftannotate.image.captioning.ImageCaptioningOpenAI
-::: swiftannotate.image.captioning.ImageCaptioningGemini
-::: swiftannotate.image.captioning.ImageCaptioningQwen2VL
+::: swiftannotate.image.captioning
 
 ## Classification
 

@@ -87,6 +87,22 @@ The pipeline can be customized with different model combinations and validation 
 
 #### Captioning
 
-Currently, we support OpenAI, Google-Gemini, and Qwen2-VL for image captioning.
+Currently, we support OpenAI, Google-Gemini, and Qwen2-VL for image captioning. To get started quickly refer the code snippet shown below.
+
+```python
+from swiftannotate.image import ImageCaptioningOpenAI
+
+caption_model = "gpt-4o"
+validation_model = "gpt-4o-mini"
+api_key = "<YOUR_OPENAI_API_KEY>"
+image_paths = ["test/image1.jpg", "test/image2.jpg"]
+
+image_captioning_pipeline = ImageCaptioningOpenAI(
+    caption_model=caption_model,
+    validation_model=validation_model,
+    api_key=api_key,
+    output_file="image_captioning_output.json"
+)
+```
 
 ### Videos
