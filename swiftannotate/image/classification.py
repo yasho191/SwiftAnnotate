@@ -5,7 +5,7 @@ import logging
 import json
 from tqdm import tqdm
 from typing import Tuple, List, Dict
-from qwen_vision_utils import process_vision_info
+from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from swiftannotate.image.base import BaseImageClassification, ImageValidationOutputOpenAI, ImageValidationOutputGemini
 from swiftannotate.image.base import ImageClassificationOutputGemini, ImageClassificationOutputOpenAI
