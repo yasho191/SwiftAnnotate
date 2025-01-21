@@ -17,7 +17,7 @@ jobs:
   build:
     name: "Build and Deploy"
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.event_name == 'push'  # Run this job for pull requests only
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
 
