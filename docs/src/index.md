@@ -106,3 +106,16 @@ image_captioning_pipeline = ImageCaptioningOpenAI(
 ```
 
 ### Videos
+
+## Contributing to SwiftAnnotate 🤝
+
+We welcome contributions to SwiftAnnotate! There are several ways you can help improve the project:
+
+- **Enhanced Prompts**: Contribute better validation and annotation prompts for improved accuracy
+- **File Support**: Add support for additional input/output file formats
+- **Cloud Integration**: Implement AWS S3 storage support and other cloud services
+- **Validation Strategies**: Develop new validation approaches for different annotation tasks
+- **Model Support**: Integrate additional LLMs and VLMs
+- **Documentation**: Improve guides and examples
+
+Please submit a pull request with your contributions or open an issue to discuss new features.
