@@ -304,6 +304,50 @@ class BaseImageClassification(BaseImageAnnotation):
         return results
 
 
+# Object Detection Base Class
+class BaseObjectDetection(BaseImageAnnotation):
+    def __init__(
+        self,
+        class_labels: List[str],
+        confidence_threshold: float,
+        validation: bool,
+        validation_prompt: str,
+        validation_threshold: float,
+        output_file: str | None = None,
+    ):
+        assert len(class_labels) >= 1, "class_labels must be a list of strings with at least one label."
+        self.class_labels = class_labels
+        assert confidence_threshold > 0.0 and confidence_threshold <= 1.0, "confidence_threshold must be between 0 and 1."
+        self.confidence_threshold = confidence_threshold
+        
+        self.validation = validation
+        self.validation_prompt = validation_prompt
+        self.validation_threshold = validation_threshold
+        
+        if output_file is None:
+            self.output_file = None
+        else:
+            assert output_file.endswith(".json") == True, "Output file must be a either None or a JSON file."
+            self.output_file = output_file
+    
+    @abstractmethod
+    def annotate(self, image: Image.Image | str, feedback_prompt: str = "", **kwargs) -> List[str]:
+        """
+        Generates annotations for an image. 
+        """
+        raise NotImplementedError("annotate method must be implemented in every subclass.")
+    
+    @abstractmethod
+    def validate(self, image: Image.Image | str, annotation: List[str], **kwargs) -> Tuple[str, float]:
+        """
+        Validates annotations for an image. 
+        """
+        raise NotImplementedError("validate method must be implemented in every subclass.")
+    
+    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
+        pass
+    
+    
 ################################################
 #     Pydantic Models for Stuctured Output     #
 ################################################
