@@ -134,7 +134,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
                             {
                                 "image_path": image_path, 
                                 "image_caption": caption, 
-                                "validation_reasioning":validation_reasoning, 
+                                "validation_reasoning":validation_reasoning, 
                                 "validation_score":confidence
                             }
                         )
@@ -149,7 +149,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
                         {
                             "image_path": image_path, 
                             "image_caption": f"CAPTION_FAILED_VALIDATION: {caption}", 
-                            "validation_reasioning":validation_reasoning, 
+                            "validation_reasoning":validation_reasoning, 
                             "validation_score":confidence
                         }
                     )
@@ -159,7 +159,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
                     {
                         "image_path": image_path, 
                         "image_caption": caption, 
-                        "validation_reasioning":None, 
+                        "validation_reasoning":None, 
                         "validation_score":None
                     }
                 )
@@ -266,7 +266,7 @@ class BaseImageClassification(BaseImageAnnotation):
                             {
                                 "image_path": image_path, 
                                 "image_classification": classification, 
-                                "validation_reasioning":validation_reasoning, 
+                                "validation_reasoning":validation_reasoning, 
                                 "validation_score":confidence
                             }
                         )
@@ -281,7 +281,7 @@ class BaseImageClassification(BaseImageAnnotation):
                         {
                             "image_path": image_path, 
                             "image_classification": f"CLASSIFICATION_FAILED_VALIDATION: {classification}", 
-                            "validation_reasioning":validation_reasoning, 
+                            "validation_reasoning":validation_reasoning, 
                             "validation_score":confidence
                         }
                     )
@@ -291,7 +291,7 @@ class BaseImageClassification(BaseImageAnnotation):
                     {
                         "image_path": image_path, 
                         "image_classification": classification, 
-                        "validation_reasioning":None, 
+                        "validation_reasoning":None, 
                         "validation_score":None
                     }
                 )
