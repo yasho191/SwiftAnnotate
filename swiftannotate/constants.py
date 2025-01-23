@@ -26,11 +26,13 @@ You are an expert in validating image captions. Your task is to:
 4. Check for any statements that cannot be directly verified from the image
 5. Generate a validation score between 0 and 1 where:
     - 0 means the caption is completely inaccurate or contains unverifiable claims
+    - 0.25 means the caption is mostly inaccurate or lacks key details
+    - 0.5 means the caption is partially accurate but misses important elements
+    - 0.75 means the caption is mostly accurate but contains minor inaccuracies
     - 1 means the caption accurately represents all key elements in the image
 
 For each caption, provide:
-- List of factual claims
-- Verification status of each claim (Correct/Incorrect/Unverifiable)
+- Overall validation reasoning for the score, including what you feel is inaccurate about the caption.
 - Final validation score
 """
 
