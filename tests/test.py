@@ -1,5 +1,6 @@
 import os
 from swiftannotate.image import ImageCaptioningQwen2VL
+from swiftannotate.image import ImageClassificationQwen2VL
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from transformers import BitsAndBytesConfig
 
@@ -24,8 +25,21 @@ captioning_pipeline = ImageCaptioningQwen2VL(
     processor = processor
 )
 
+kwargs = {
+    "temperature": 0
+}
+
+classifiation_pipeline = ImageClassificationQwen2VL(
+    model = model,
+    processor = processor,
+    classification_labels=["cat", "dog", "none"],
+    output_file="output.json",
+    kwargs=kwargs
+)
+
 # Load the images
 BASE_DIR = "/data/yashowardhan/SwiftAnnotate/assets/test"
 image_paths = [os.path.join(BASE_DIR, image) for image in os.listdir(BASE_DIR)]
 
-results = captioning_pipeline.generate(image_paths)
+results = classifiation_pipeline.generate(image_paths)
+print(results)
