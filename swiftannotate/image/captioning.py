@@ -1,3 +1,4 @@
+from sympy import use
 import torch
 from openai import OpenAI
 import google.generativeai as genai
@@ -216,9 +217,9 @@ class ImageCaptioningGemini(BaseImageCaptioning):
         caption_model: str, 
         validation_model: str,
         api_key: str, 
-        caption_prompt: str | None = None, 
+        caption_prompt: str = BASE_IMAGE_CAPTION_PROMPT, 
         validation: bool = True,
-        validation_prompt: str | None = None,
+        validation_prompt: str = BASE_IMAGE_CAPTION_VALIDATION_PROMPT,
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
         output_file: str | None = None,
@@ -378,9 +379,9 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         self, 
         model: AutoModelForImageTextToText, 
         processor: AutoProcessor,
-        caption_prompt: str | None = None, 
+        caption_prompt: str = BASE_IMAGE_CAPTION_PROMPT, 
         validation: bool = True,
-        validation_prompt: str | None = None,
+        validation_prompt: str = BASE_IMAGE_CAPTION_VALIDATION_PROMPT,
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
         output_file: str | None = None,
@@ -494,6 +495,9 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         inputs = inputs.to(self.model.device)
 
         # Inference: Generation of the output
+        if "max_new_tokens" not in kwargs:
+            kwargs["max_new_tokens"] = 512
+            
         generated_ids = self.model.generate(**inputs, **kwargs)
         generated_ids_trimmed = [
             out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
@@ -553,6 +557,9 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
         inputs = inputs.to(self.model.device)
 
         # Inference: Generation of the output
+        if "max_new_tokens" not in kwargs:
+            kwargs["max_new_tokens"] = 512
+            
         generated_ids = self.model.generate(**inputs, **kwargs)
         generated_ids_trimmed = [
             out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
@@ -571,7 +578,8 @@ class ImageCaptioningQwen2VL(BaseImageCaptioning):
             logging.error(f"Image caption validation parsing failed trying to parse using another logic.")
             
             number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in validation_output)
-            potential_confidence_scores = [float(i) for i in number_str.split() if float(i) >= 0 and float(i) <= 1]
+            number_str = [i for i in number_str.split() if i.isalnum()]
+            potential_confidence_scores = [float(i) for i in number_str if float(i) >= 0 and float(i) <= 1]
             confidence = max(potential_confidence_scores) if potential_confidence_scores else 0.0
             validation_reasoning = validation_output
         
