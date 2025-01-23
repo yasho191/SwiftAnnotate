@@ -143,7 +143,8 @@ processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
 # Load the Caption Model
 captioning_pipeline = ImageCaptioningQwen2VL(
     model = model,
-    processor = processor
+    processor = processor,
+    output_file="image_captioning_output.json"
 )
 
 results = captioning_pipeline.generate(image_paths)
