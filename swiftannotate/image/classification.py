@@ -223,9 +223,9 @@ class ImageClassificationGemini(BaseImageClassification):
         validation_model: str,
         api_key: str, 
         classification_labels: List[str],
-        classification_prompt: str | None = None, 
+        classification_prompt: str = BASE_IMAGE_CLASSIFICATION_PROMPT, 
         validation: bool = True,
-        validation_prompt: str | None = None,
+        validation_prompt: str = BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT,
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
         output_file: str | None = None,
@@ -393,9 +393,9 @@ class ImageClassificationQwen2VL(BaseImageClassification):
         model: AutoModelForImageTextToText, 
         processor: AutoProcessor,
         classification_labels: List[str],
-        classification_prompt: str | None = None, 
+        classification_prompt: str = BASE_IMAGE_CLASSIFICATION_PROMPT, 
         validation: bool = True,
-        validation_prompt: str | None = None,
+        validation_prompt: str = BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT,
         validation_threshold: float = 0.5,
         max_retry: int = 3, 
         output_file: str | None = None,
@@ -514,6 +514,9 @@ class ImageClassificationQwen2VL(BaseImageClassification):
         inputs = inputs.to(self.model.device)
 
         # Inference: Generation of the output
+        if "max_new_tokens" not in kwargs:
+            kwargs["max_new_tokens"] = 512
+            
         generated_ids = self.model.generate(**inputs, **kwargs)
         generated_ids_trimmed = [
             out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
@@ -582,6 +585,9 @@ class ImageClassificationQwen2VL(BaseImageClassification):
         inputs = inputs.to(self.model.device)
 
         # Inference: Generation of the output
+        if "max_new_tokens" not in kwargs:
+            kwargs["max_new_tokens"] = 512
+            
         generated_ids = self.model.generate(**inputs, **kwargs)
         generated_ids_trimmed = [
             out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
@@ -600,7 +606,8 @@ class ImageClassificationQwen2VL(BaseImageClassification):
             logging.error(f"Image class label validation parsing failed trying to parse using another logic.")
             
             number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in validation_output)
-            potential_confidence_scores = [float(i) for i in number_str.split() if float(i) >= 0 and float(i) <= 1]
+            number_str = [i for i in number_str.split() if i.isalnum()]
+            potential_confidence_scores = [float(i) for i in number_str if float(i) >= 0 and float(i) <= 1]
             confidence = max(potential_confidence_scores) if potential_confidence_scores else 0.0
             validation_reasoning = validation_output
         
