@@ -2,7 +2,7 @@ import logging
 import json
 from typing import Tuple, List, Dict
 from qwen_vl_utils import process_vision_info
-from transformers import AutoProcessor, AutoModelForImageTextToText
+from transformers import AutoProcessor, AutoModelForImageTextToText, Qwen2VLForConditionalGeneration, Qwen2VLProcessor
 from swiftannotate.image.base import BaseImageClassification
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 
@@ -13,8 +13,8 @@ class ImageClassificationQwen2VL(BaseImageClassification):
     """
     def __init__(
         self, 
-        model: AutoModelForImageTextToText, 
-        processor: AutoProcessor,
+        model: AutoModelForImageTextToText | Qwen2VLForConditionalGeneration, 
+        processor: AutoProcessor | Qwen2VLProcessor,
         classification_labels: List[str],
         classification_prompt: str = BASE_IMAGE_CLASSIFICATION_PROMPT, 
         validation: bool = True,
@@ -62,7 +62,13 @@ class ImageClassificationQwen2VL(BaseImageClassification):
         Notes:
             `validation_prompt` should specify the rules for validating the class label and the range of validation score to be generated example (0-1).
             Your `validation_threshold` should be within this specified range.
-        """     
+        """    
+        
+        if not isinstance(model, Qwen2VLForConditionalGeneration):
+            raise ValueError("Model should be an instance of Qwen2VLForConditionalGeneration.")
+        if not isinstance(processor, Qwen2VLProcessor):
+            raise ValueError("Processor should be an instance of Qwen2VLProcessor.")
+         
         self.model = model
         self.processor = processor
         
