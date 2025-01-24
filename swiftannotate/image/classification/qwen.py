@@ -7,7 +7,7 @@ from swiftannotate.image.base import BaseImageClassification
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 
   
-class ImageClassificationQwen2VL(BaseImageClassification):
+class Qwen2VLForImageClassification(BaseImageClassification):
     """
     Image classification pipeline using Qwen2VL model.
     """

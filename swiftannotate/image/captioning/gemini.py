@@ -6,7 +6,7 @@ from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_I
 
 
 
-class ImageCaptioningGemini(BaseImageCaptioning):
+class GeminiForImageCaptioning(BaseImageCaptioning):
     def __init__(
         self, 
         caption_model: str, 

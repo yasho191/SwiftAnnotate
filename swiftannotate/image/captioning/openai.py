@@ -5,7 +5,7 @@ from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutputO
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
 
-class ImageCaptioningOpenAI(BaseImageCaptioning):
+class OpenAIForImageCaptioning(BaseImageCaptioning):
     """
     Image captioning pipeline using OpenAI API.
     """

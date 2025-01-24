@@ -1,9 +1,9 @@
-from swiftannotate.image.captioning.openai import ImageCaptioningOpenAI
-from swiftannotate.image.captioning.qwen import ImageCaptioningQwen2VL
-from swiftannotate.image.captioning.gemini import ImageCaptioningGemini
+from swiftannotate.image.captioning.openai import OpenAIForImageCaptioning
+from swiftannotate.image.captioning.qwen import Qwen2VLForImageCaptioning
+from swiftannotate.image.captioning.gemini import GeminiForImageCaptioning
 
 __all__ = [
-    "ImageCaptioningOpenAI",
-    "ImageCaptioningQwen2VL",
-    "ImageCaptioningGemini"
+    "OpenAIForImageCaptioning",
+    "Qwen2VLForImageCaptioning",
+    "GeminiForImageCaptioning"
 ]

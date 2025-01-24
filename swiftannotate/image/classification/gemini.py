@@ -6,7 +6,7 @@ from swiftannotate.image.base import ImageClassificationOutputGemini
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 
 
-class ImageClassificationGemini(BaseImageClassification):
+class GeminiForImageClassification(BaseImageClassification):
     def __init__(
         self, 
         classification_model: str, 

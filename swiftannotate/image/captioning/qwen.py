@@ -7,7 +7,7 @@ from swiftannotate.image.base import BaseImageCaptioning
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
     
     
-class ImageCaptioningQwen2VL(BaseImageCaptioning):
+class Qwen2VLForImageCaptioning(BaseImageCaptioning):
     """
     Image captioning pipeline using Qwen2VL model.
     """

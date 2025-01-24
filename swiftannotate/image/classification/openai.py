@@ -5,7 +5,7 @@ from swiftannotate.image.base import BaseImageClassification, ImageValidationOut
 from swiftannotate.image.base import ImageClassificationOutputOpenAI
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 
-class ImageClassificationOpenAI(BaseImageClassification):
+class OpenAIForImageClassification(BaseImageClassification):
     """
     Image classification pipeline using OpenAI API. 
     """
