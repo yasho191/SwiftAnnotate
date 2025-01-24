@@ -93,7 +93,7 @@ Currently, we support OpenAI, Google-Gemini, and Qwen2-VL for image captioning. 
 
 ```python
 import os
-from swiftannotate.image import ImageCaptioningOpenAI
+from swiftannotate.image import OpenAIForImageCaptioning
 
 caption_model = "gpt-4o"
 validation_model = "gpt-4o-mini"
@@ -119,7 +119,7 @@ You can use any version for the Qwen2-VL (7B, 72B) depending on the available re
 import os
 from transformers import AutoProcessor, AutoModelForImageTextToText
 from transformers import BitsAndBytesConfig
-from swiftannotate.image import ImageCaptioningQwen2VL
+from swiftannotate.image import Qwen2VLForImageCaptioning
 
 # Load the images
 BASE_DIR = "<IMAGE_DIR>"
