@@ -72,7 +72,8 @@ class BaseImageCaptioning(BaseImageAnnotation):
         self.validation_threshold = validation_threshold
         
         self.max_retry = max_retry
-        assert self.max_retry > 0, "max_retry must be greater than 0."
+        if self.max_retry < 1 and self.validation:
+            raise ValueError("max_retry must be greater than 0 as Validation is True.")
         
         if output_file is None:
             self.output_file = None  
@@ -195,7 +196,9 @@ class BaseImageClassification(BaseImageAnnotation):
         output_file: str | None = None,
         **kwargs
     ):
-        assert len(classification_labels) > 1, "classification_labels must be a list of strings with at least two labels."
+        if len(classification_labels) < 2:
+            raise ValueError("classification_labels must be a list of strings with at least two labels.")
+        
         self.classification_labels = [label.lower() for label in classification_labels]
         self.classification_prompt = classification_prompt
         
@@ -204,7 +207,8 @@ class BaseImageClassification(BaseImageAnnotation):
         self.validation_threshold = validation_threshold
         
         self.max_retry = max_retry
-        assert self.max_retry > 0, "max_retry must be greater than 0."
+        if self.max_retry < 1 and self.validation:
+            raise ValueError("max_retry must be greater than 0 as Validation is True.")
         
         if output_file is None:
             self.output_file = None  
