@@ -28,25 +28,25 @@ def setup_model_and_processor():
 
 
 def test_image_classification_pipeline_initialization(setup_model_and_processor):
-    from swiftannotate.image import ImageClassificationQwen2VL
+    from swiftannotate.image import Qwen2VLForImageClassification
     
     model, processor = setup_model_and_processor
     kwargs = {"temperature": 0}
-    classification_pipeline = ImageClassificationQwen2VL(
+    classification_pipeline = Qwen2VLForImageClassification(
         model=model,
         processor=processor,
         classification_labels=["cat", "dog", "none"],
         output_file="output.json",
         kwargs=kwargs
     )
-    assert isinstance(classification_pipeline, ImageClassificationQwen2VL)
+    assert isinstance(classification_pipeline, Qwen2VLForImageClassification)
 
 
 def test_image_classification_generate(setup_model_and_processor):
-    from swiftannotate.image import ImageClassificationQwen2VL
+    from swiftannotate.image import Qwen2VLForImageClassification
     model, processor = setup_model_and_processor
     kwargs = {"temperature": 0}
-    classification_pipeline = ImageClassificationQwen2VL(
+    classification_pipeline = Qwen2VLForImageClassification(
         model=model,
         processor=processor,
         classification_labels=["kitchen", "bottle", "none"],
@@ -68,12 +68,12 @@ def test_image_classification_generate(setup_model_and_processor):
 
 
 def test_invalid_classification_labels(setup_model_and_processor):
-    from swiftannotate.image import ImageClassificationQwen2VL
+    from swiftannotate.image import Qwen2VLForImageClassification
     model, processor = setup_model_and_processor
     kwargs = {"temperature": 0}
     
     with pytest.raises(ValueError):
-        ImageClassificationQwen2VL(
+        Qwen2VLForImageClassification(
             model=model,
             processor=processor,
             classification_labels=[],  # Empty labels should raise error

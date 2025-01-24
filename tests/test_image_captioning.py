@@ -28,21 +28,21 @@ def setup_model_and_processor():
 
 
 def test_image_captioning_pipeline_initialization(setup_model_and_processor):
-    from swiftannotate.image import ImageCaptioningQwen2VL
+    from swiftannotate.image import Qwen2VLForImageCaptioning
     
     model, processor = setup_model_and_processor
-    captioning_pipeline = ImageCaptioningQwen2VL(
+    captioning_pipeline = Qwen2VLForImageCaptioning(
         model=model,
         processor=processor
     )
-    assert isinstance(captioning_pipeline, ImageCaptioningQwen2VL)
+    assert isinstance(captioning_pipeline, Qwen2VLForImageCaptioning)
 
 
 def test_image_captioning_generate(setup_model_and_processor):
-    from swiftannotate.image import ImageCaptioningQwen2VL
+    from swiftannotate.image import Qwen2VLForImageCaptioning
     
     model, processor = setup_model_and_processor
-    captioning_pipeline = ImageCaptioningQwen2VL(
+    captioning_pipeline = Qwen2VLForImageCaptioning(
         model=model,
         processor=processor,
         output_file="output.json"
