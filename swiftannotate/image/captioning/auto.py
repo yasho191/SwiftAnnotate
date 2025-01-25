@@ -42,6 +42,7 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
     #         'validation_score': 0.8
     #     },
     # ]
+    ```
     """
     
     SUPPORTED_MODELS = {
