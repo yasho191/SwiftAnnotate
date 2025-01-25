@@ -1,11 +1,12 @@
-import logging
 import json
 from typing import Tuple, List, Dict
 from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, AutoModelForImageTextToText, Qwen2VLForConditionalGeneration, Qwen2VLProcessor
 from swiftannotate.image.base import BaseImageClassification
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 
+logger = setup_logger(__name__)
   
 class Qwen2VLForImageClassification(BaseImageClassification):
     """
@@ -159,7 +160,7 @@ class Qwen2VLForImageClassification(BaseImageClassification):
             class_label = json.loads(class_label)
             class_label = class_label["class_label"].lower()
         except Exception as e:
-            logging.error(f"Image classification parsing failed trying to parse using another logic.")
+            logger.error(f"Image classification parsing failed trying to parse using another logic.")
             potential_class_labels = [label.lower() for label in class_label.split() if label in self.classification_labels]
             class_label = potential_class_labels[0] if potential_class_labels else "ERROR"
         
@@ -232,7 +233,7 @@ class Qwen2VLForImageClassification(BaseImageClassification):
             validation_reasoning = validation_output["validation_reasoning"]
             confidence = validation_output["confidence"]
         except Exception as e:
-            logging.error(f"Image class label validation parsing failed trying to parse using another logic.")
+            logger.error(f"Image class label validation parsing failed trying to parse using another logic.")
             
             number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in validation_output)
             number_str = [i for i in number_str.split() if i.isalnum()]

@@ -8,7 +8,7 @@ import os
 ##############################
 
 @pytest.fixture
-def setup_model_and_processor():
+def setup_qwen2_model_and_processor():
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
@@ -27,24 +27,9 @@ def setup_model_and_processor():
     return model, processor
 
 
-def test_image_classification_pipeline_initialization(setup_model_and_processor):
+def test_qwen2_image_classification(setup_qwen2_model_and_processor):
     from swiftannotate.image import Qwen2VLForImageClassification
-    
-    model, processor = setup_model_and_processor
-    kwargs = {"temperature": 0}
-    classification_pipeline = Qwen2VLForImageClassification(
-        model=model,
-        processor=processor,
-        classification_labels=["cat", "dog", "none"],
-        output_file="output.json",
-        kwargs=kwargs
-    )
-    assert isinstance(classification_pipeline, Qwen2VLForImageClassification)
-
-
-def test_image_classification_generate(setup_model_and_processor):
-    from swiftannotate.image import Qwen2VLForImageClassification
-    model, processor = setup_model_and_processor
+    model, processor = setup_qwen2_model_and_processor
     kwargs = {"temperature": 0}
     classification_pipeline = Qwen2VLForImageClassification(
         model=model,
@@ -67,9 +52,9 @@ def test_image_classification_generate(setup_model_and_processor):
     os.remove("output.json")
 
 
-def test_invalid_classification_labels(setup_model_and_processor):
+def test_invalid_classification_labels(setup_qwen2_model_and_processor):
     from swiftannotate.image import Qwen2VLForImageClassification
-    model, processor = setup_model_and_processor
+    model, processor = setup_qwen2_model_and_processor
     kwargs = {"temperature": 0}
     
     with pytest.raises(ValueError):

@@ -1,10 +1,10 @@
 import google.generativeai as genai
-import logging
 from typing import Tuple, List, Dict
 from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutputGemini
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
-
+logger = setup_logger(__name__)
 
 class GeminiForImageCaptioning(BaseImageCaptioning):
     """
@@ -134,7 +134,7 @@ class GeminiForImageCaptioning(BaseImageCaptioning):
                 )
             )
         except Exception as e:
-            logging.error(f"Image captioning failed: {e}")
+            logger.error(f"Image captioning failed: {e}")
             image_caption = "ERROR"
         
         return image_caption
@@ -171,7 +171,7 @@ class GeminiForImageCaptioning(BaseImageCaptioning):
             validation_reasoning = validation_output["validation_reasoning"]
             confidence = validation_output["confidence"]
         except Exception as e:
-            logging.error(f"Image caption validation failed: {e}")
+            logger.error(f"Image caption validation failed: {e}")
             validation_reasoning = "ERROR"
             confidence = 0.0
         

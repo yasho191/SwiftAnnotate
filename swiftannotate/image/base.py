@@ -1,12 +1,13 @@
 from tqdm import tqdm
-import logging
 from typing_extensions import TypedDict
 from PIL import Image
 import json
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
 from typing import List, Tuple, Dict
-from swiftannotate.image.utils import encode_image
+from swiftannotate.image.utils import encode_image, setup_logger
+
+logger = setup_logger(__name__)
 
 
 ##################################################
@@ -118,7 +119,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
                     caption = self.annotate(image, **kwargs)
                     caption_retry_counter = 0
                     while caption == "ERROR" and caption_retry_counter < 5:
-                        logging.info(f"Retrying captioning for {image_path} as an error occurred.")
+                        logger.info(f"Retrying captioning for {image_path} as an error occurred.")
                         caption = self.annotate(image, **kwargs)
                         caption_retry_counter += 1
                     
@@ -126,7 +127,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
                     validation_reasoning, confidence = self.validate(image, caption, **kwargs) 
                     validation_retry_counter = 0
                     while validation_reasoning == "ERROR" and confidence == 0 and validation_retry_counter < 5:
-                        logging.info(f"Retrying caption validation for {image_path} as an error occurred.")
+                        logger.info(f"Retrying caption validation for {image_path} as an error occurred.")
                         validation_reasoning, confidence = self.validate(image, caption, **kwargs)
                         validation_retry_counter += 1
                         
@@ -142,10 +143,10 @@ class BaseImageCaptioning(BaseImageAnnotation):
                         validation_flag = True
                         break
                     else:
-                        logging.info(f"Retrying captioning and validation for {image_path} as confidence score {confidence} is below threshold.")
+                        logger.info(f"Retrying captioning and validation for {image_path} as confidence score {confidence} is below threshold.")
                 
                 if not validation_flag:
-                    logging.info(f"Caption validation failed for {image_path}. Adding to results with CAPTION_FAILED_VALIDATION tag in image_caption.")
+                    logger.info(f"Caption validation failed for {image_path}. Adding to results with CAPTION_FAILED_VALIDATION tag in image_caption.")
                     results.append(
                         {
                             "image_path": image_path, 
@@ -168,7 +169,7 @@ class BaseImageCaptioning(BaseImageAnnotation):
         if self.output_file:
             with open(self.output_file, "w") as f:
                 json.dump(results, f, indent=4)
-            logging.info(f"Successfully saved results to {self.output_file}")
+            logger.info(f"Successfully saved results to {self.output_file}")
             
         return results
     
@@ -194,7 +195,6 @@ class BaseImageClassification(BaseImageAnnotation):
         validation_threshold: float,
         max_retry: int, 
         output_file: str | None = None,
-        **kwargs
     ):
         if len(classification_labels) < 2:
             raise ValueError("classification_labels must be a list of strings with at least two labels.")
@@ -253,7 +253,7 @@ class BaseImageClassification(BaseImageAnnotation):
                     classification = self.annotate(image, **kwargs)
                     classification_retry_counter = 0
                     while classification == "ERROR" and classification_retry_counter < 5:
-                        logging.info(f"Retrying classification for {image_path} as an error occurred.")
+                        logger.info(f"Retrying classification for {image_path} as an error occurred.")
                         classification = self.annotate(image, **kwargs)
                         classification_retry_counter += 1
                     
@@ -261,7 +261,7 @@ class BaseImageClassification(BaseImageAnnotation):
                     validation_reasoning, confidence = self.validate(image, classification, **kwargs) 
                     validation_retry_counter = 0
                     while validation_reasoning == "ERROR" and confidence == 0 and validation_retry_counter < 5:
-                        logging.info(f"Retrying classification validation for {image_path} as an error occurred.")
+                        logger.info(f"Retrying classification validation for {image_path} as an error occurred.")
                         validation_reasoning, confidence = self.validate(image, classification, **kwargs)
                         validation_retry_counter += 1
                         
@@ -277,10 +277,10 @@ class BaseImageClassification(BaseImageAnnotation):
                         validation_flag = True
                         break
                     else:
-                        logging.info(f"Retrying classification and validation for {image_path} as confidence score {confidence} is below threshold.")
+                        logger.info(f"Retrying classification and validation for {image_path} as confidence score {confidence} is below threshold.")
                 
                 if not validation_flag:
-                    logging.info(f"Classification validation failed for {image_path}. Adding to results with CLASSIFICATION_FAILED_VALIDATION tag in image_classification.")
+                    logger.info(f"Classification validation failed for {image_path}. Adding to results with CLASSIFICATION_FAILED_VALIDATION tag in image_classification.")
                     results.append(
                         {
                             "image_path": image_path, 
@@ -303,7 +303,7 @@ class BaseImageClassification(BaseImageAnnotation):
         if self.output_file:
             with open(self.output_file, "w") as f:
                 json.dump(results, f, indent=4)
-            logging.info(f"Successfully saved results to {self.output_file}")
+            logger.info(f"Successfully saved results to {self.output_file}")
         
         return results
 
@@ -319,9 +319,12 @@ class BaseObjectDetection(BaseImageAnnotation):
         validation_threshold: float,
         output_file: str | None = None,
     ):
-        assert len(class_labels) >= 1, "class_labels must be a list of strings with at least one label."
+        if len(class_labels) < 1:
+            raise ValueError("class_labels must be a list of strings with at least one label.")
         self.class_labels = class_labels
-        assert confidence_threshold > 0.0 and confidence_threshold <= 1.0, "confidence_threshold must be between 0 and 1."
+        
+        if not 0.0 < confidence_threshold <= 1.0:
+            raise ValueError("confidence_threshold must be between 0 and 1.")
         self.confidence_threshold = confidence_threshold
         
         self.validation = validation
@@ -348,8 +351,58 @@ class BaseObjectDetection(BaseImageAnnotation):
         """
         raise NotImplementedError("validate method must be implemented in every subclass.")
     
-    def generate(self, image_paths: List[str], **kwargs) -> List[Dict]:
-        pass
+    def generate(self, image_paths: List[str]) -> List[Dict]:
+        results = []
+        for image_path in image_paths:
+            image = Image.open(image_path)
+            
+            if self.validation:
+                validation_flag = False
+                for _ in range(5):
+                    annotations = self.annotate(image)
+                    validation_reasoning, confidence = self.validate(image, annotations)
+                    
+                    if confidence > self.validation_threshold:
+                        results.append(
+                            {
+                                "image_path": image_path, 
+                                "annotations": annotations, 
+                                "validation_reasoning": validation_reasoning, 
+                                "validation_score": confidence
+                            }
+                        )
+                        validation_flag = True
+                        break
+                    else:
+                        logger.info(f"Retrying object detection and validation for {image_path} as confidence score {confidence} is below threshold.")
+                
+                if not validation_flag:
+                    logger.info(f"Object detection validation failed for {image_path}. Adding to results with OBJECT_DETECTION_FAILED_VALIDATION tag in annotations.")
+                    results.append(
+                        {
+                            "image_path": image_path, 
+                            "annotations": ["OBJECT_DETECTION_FAILED_VALIDATION"], 
+                            "validation_reasoning": validation_reasoning, 
+                            "validation_score": confidence
+                        }
+                    )
+            else:
+                annotations = self.annotate(image)
+                results.append(
+                    {
+                        "image_path": image_path, 
+                        "annotations": annotations, 
+                        "validation_reasoning": None, 
+                        "validation_score": None
+                    }
+                )
+        
+        if self.output_file:
+            with open(self.output_file, "w") as f:
+                json.dump(results, f, indent=4)
+            logger.info(f"Successfully saved results to {self.output_file}")
+        
+        return results
     
     
 ################################################

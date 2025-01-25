@@ -1,9 +1,11 @@
 from openai import OpenAI
-import logging
 from typing import Tuple, List, Dict
 from swiftannotate.image.base import BaseImageClassification, ImageValidationOutputOpenAI
 from swiftannotate.image.base import ImageClassificationOutputOpenAI
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
+
+logger = setup_logger(__name__)
 
 class OpenAIForImageClassification(BaseImageClassification):
     """
@@ -131,7 +133,7 @@ class OpenAIForImageClassification(BaseImageClassification):
             output = response.choices[0].message.parsed
             class_label = output.class_label.lower()
         except Exception as e:
-            logging.error(f"Image classification failed: {e}")
+            logger.error(f"Image classification failed: {e}")
             class_label = "ERROR"
             
         return class_label
@@ -185,7 +187,7 @@ class OpenAIForImageClassification(BaseImageClassification):
             confidence = validation_output.confidence
             
         except Exception as e:
-            logging.error(f"Image class label validation failed: {e}")
+            logger.error(f"Image class label validation failed: {e}")
             validation_reasoning = "ERROR"
             confidence = 0
             

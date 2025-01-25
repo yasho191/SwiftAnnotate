@@ -1,4 +1,3 @@
-import logging
 import json
 import google.generativeai as genai
 from openai import OpenAI
@@ -7,8 +6,10 @@ from qwen_vl_utils import process_vision_info
 from transformers import Qwen2VLForConditionalGeneration, Qwen2VLProcessor
 from swiftannotate.image.base import BaseImageCaptioning
 from swiftannotate.image.base import ImageValidationOutputGemini
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
+logger = setup_logger(__name__)
 
 class AutoModelForImageCaptioning(BaseImageCaptioning):
     """
@@ -118,12 +119,12 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
             Same applies for validation_model_processor or validation_api_key if validation is enabled.
         """
         super().__init__(
-            caption_prompt, 
-            validation, 
-            validation_prompt, 
-            validation_threshold, 
-            max_retry, 
-            output_file
+            caption_prompt=caption_prompt,
+            validation=validation,
+            validation_prompt=validation_prompt,
+            validation_threshold=validation_threshold,
+            max_retry=max_retry,
+            output_file=output_file
         )
         
         self.caption_model, self.caption_model_processor, self.caption_model_type = self._initialize_model(
@@ -167,7 +168,7 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
             image_caption = response.choices[0].message.content.strip()
             
         except Exception as e:
-            logging.error(f"Image captioning failed: {e}")
+            logger.error(f"Image captioning failed: {e}")
             image_caption = "ERROR"
             
         return image_caption
@@ -184,7 +185,7 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
                     )
                 )
             except Exception as e:
-                logging.error(f"Image captioning failed: {e}")
+                logger.error(f"Image captioning failed: {e}")
                 image_caption = "ERROR"
             
             return image_caption
@@ -200,7 +201,7 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
                 validation_reasoning = validation_output["validation_reasoning"]
                 confidence = validation_output["confidence"]
             except Exception as e:
-                logging.error(f"Image caption validation failed: {e}")
+                logger.error(f"Image caption validation failed: {e}")
                 validation_reasoning = "ERROR"
                 confidence = 0.0
             
@@ -250,7 +251,7 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
                 validation_reasoning = validation_output["validation_reasoning"]
                 confidence = validation_output["confidence"]
             except Exception as e:
-                logging.error(f"Image caption validation parsing failed trying to parse using another logic.")
+                logger.error(f"Image caption validation parsing failed trying to parse using another logic.")
                 
                 number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in validation_output)
                 number_str = [i for i in number_str.split() if i.isalnum()]

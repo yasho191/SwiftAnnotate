@@ -11,6 +11,10 @@ from swiftannotate.image.classification import (
     GeminiForImageClassification
 )
 
+from swiftannotate.image.object_detection import (
+    OwlV2ForObjectDetection,
+)
+
 __all__ = [
     "OpenAIForImageCaptioning",
     "Qwen2VLForImageCaptioning",
@@ -18,5 +22,6 @@ __all__ = [
     "AutoModelForImageCaptioning",
     "OpenAIForImageClassification",
     "Qwen2VLForImageClassification",
-    "GeminiForImageClassification"
+    "GeminiForImageClassification",
+    "OwlV2ForObjectDetection",
 ]

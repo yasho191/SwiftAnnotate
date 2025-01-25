@@ -1,9 +1,10 @@
 from openai import OpenAI
-import logging
 from typing import Tuple, List, Dict
 from swiftannotate.image.base import BaseImageCaptioning, ImageValidationOutputOpenAI
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
+logger = setup_logger(__name__)
 
 class OpenAIForImageCaptioning(BaseImageCaptioning):
     """
@@ -154,7 +155,7 @@ class OpenAIForImageCaptioning(BaseImageCaptioning):
             image_caption = response.choices[0].message.content.strip()
             
         except Exception as e:
-            logging.error(f"Image captioning failed: {e}")
+            logger.error(f"Image captioning failed: {e}")
             image_caption = "ERROR"
             
         return image_caption
@@ -208,7 +209,7 @@ class OpenAIForImageCaptioning(BaseImageCaptioning):
             confidence = validation_output.confidence
             
         except Exception as e:
-            logging.error(f"Image caption validation failed: {e}")
+            logger.error(f"Image caption validation failed: {e}")
             validation_reasoning = "ERROR"
             confidence = 0
             

@@ -8,7 +8,7 @@ import os
 ##############################
 
 @pytest.fixture
-def setup_model_and_processor():
+def setup_qwen2_model_and_processor():
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type="nf4",
@@ -27,21 +27,10 @@ def setup_model_and_processor():
     return model, processor
 
 
-def test_image_captioning_pipeline_initialization(setup_model_and_processor):
+def test_qwen2_image_captioning(setup_qwen2_model_and_processor):
     from swiftannotate.image import Qwen2VLForImageCaptioning
     
-    model, processor = setup_model_and_processor
-    captioning_pipeline = Qwen2VLForImageCaptioning(
-        model=model,
-        processor=processor
-    )
-    assert isinstance(captioning_pipeline, Qwen2VLForImageCaptioning)
-
-
-def test_image_captioning_generate(setup_model_and_processor):
-    from swiftannotate.image import Qwen2VLForImageCaptioning
-    
-    model, processor = setup_model_and_processor
+    model, processor = setup_qwen2_model_and_processor
     captioning_pipeline = Qwen2VLForImageCaptioning(
         model=model,
         processor=processor,

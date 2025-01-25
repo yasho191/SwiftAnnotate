@@ -1,11 +1,12 @@
-import logging
 import json
 from typing import Tuple, List, Dict
 from qwen_vl_utils import process_vision_info
 from transformers import AutoProcessor, AutoModelForImageTextToText, Qwen2VLForConditionalGeneration, Qwen2VLProcessor
 from swiftannotate.image.base import BaseImageCaptioning
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
-    
+
+logger = setup_logger(__name__)
     
 class Qwen2VLForImageCaptioning(BaseImageCaptioning):
     """
@@ -260,7 +261,7 @@ class Qwen2VLForImageCaptioning(BaseImageCaptioning):
             validation_reasoning = validation_output["validation_reasoning"]
             confidence = validation_output["confidence"]
         except Exception as e:
-            logging.error(f"Image caption validation parsing failed trying to parse using another logic.")
+            logger.error(f"Image caption validation parsing failed trying to parse using another logic.")
             
             number_str  = ''.join((ch if ch in '0123456789.-e' else ' ') for ch in validation_output)
             number_str = [i for i in number_str.split() if i.isalnum()]

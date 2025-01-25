@@ -1,9 +1,11 @@
 import google.generativeai as genai
-import logging
 from typing import Tuple, List, Dict
 from swiftannotate.image.base import BaseImageClassification, ImageValidationOutputGemini
 from swiftannotate.image.base import ImageClassificationOutputGemini
+from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
+
+logger = setup_logger(__name__)
 
 
 class GeminiForImageClassification(BaseImageClassification):
@@ -111,7 +113,7 @@ class GeminiForImageClassification(BaseImageClassification):
             )
             class_label = output["class_label"].lower()
         except Exception as e:
-            logging.error(f"Image classification failed: {e}")
+            logger.error(f"Image classification failed: {e}")
             class_label = "ERROR"
         
         return class_label
@@ -148,7 +150,7 @@ class GeminiForImageClassification(BaseImageClassification):
             validation_reasoning = validation_output["validation_reasoning"]
             confidence = validation_output["confidence"]
         except Exception as e:
-            logging.error(f"Image class label validation failed: {e}")
+            logger.error(f"Image class label validation failed: {e}")
             validation_reasoning = "ERROR"
             confidence = 0.0
         
