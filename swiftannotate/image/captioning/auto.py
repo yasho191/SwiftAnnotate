@@ -14,6 +14,34 @@ class AutoModelForImageCaptioning(BaseImageCaptioning):
     """
     AutoModelForImageCaptioning pipeline supporting different combinations of annotation and validation models
     OpenAI, Gemini, and Qwen2-VL.
+    
+    Example Usage:
+    ```python
+    from swiftannotate.image import AutoModelForImageCaptioning
+    
+    # Initialize the pipeline
+    # Note: You can use either Qwen2VL, OpenAI, and Gemini for captioning and validation.
+    captioner = AutoModelForImageCaptioning(
+        caption_model="gpt-4o",
+        validation_model="gemini-1.5-flash",
+        caption_api_key="your_openai_api_key",
+        validation_api_key="your_gemini_api_key",
+        output_file="captions.json"
+    )
+    
+    # Generate captions for a list of images
+    image_paths = ["path/to/image1.jpg"]
+    results = captioner.generate(image_paths)
+    
+    # Print results
+    # Output: [
+    #     {
+    #         'image_path': 'path/to/image1.jpg',
+    #         'image_caption': 'A cat sitting on a table.',
+    #         'validation_reasoning': 'The caption is valid.',
+    #         'validation_score': 0.8
+    #     },
+    # ]
     """
     
     SUPPORTED_MODELS = {

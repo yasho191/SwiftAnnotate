@@ -7,6 +7,37 @@ from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_I
 
 
 class GeminiForImageCaptioning(BaseImageCaptioning):
+    """
+    ImageCaptioningGemini pipeline for generating captions for images using Gemini models.
+    
+    Example usage:
+    ```python
+    from swiftannotate.image import GeminiForImageCaptioning
+    
+    # Initialize the pipeline
+    captioner = GeminiForImageCaptioning(
+        caption_model="gemini-1.5-pro",
+        validation_model="gemini-1.5-flash",
+        api_key="your_api_key_here",
+        output_file="captions.json"
+    )
+
+    # Generate captions for a list of images
+    image_paths = ["path/to/image1.jpg"]
+    results = captioner.generate(image_paths)
+
+    # Print results
+    # Output: [
+    #     {
+    #         'image_path': 'path/to/image1.jpg', 
+    #         'image_caption': 'A cat sitting on a table.', 
+    #         'validation_reasoning': 'The caption is valid.', 
+    #         'validation_score': 0.8
+    #     }, 
+    # ]
+    ```
+    """
+    
     def __init__(
         self, 
         caption_model: str, 

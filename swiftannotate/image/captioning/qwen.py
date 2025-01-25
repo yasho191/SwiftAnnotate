@@ -10,6 +10,49 @@ from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_I
 class Qwen2VLForImageCaptioning(BaseImageCaptioning):
     """
     Image captioning pipeline using Qwen2VL model.
+    
+    Example usage:
+    ```python
+    from transformers import AutoProcessor, AutoModelForImageTextToText
+    from transformers import BitsAndBytesConfig
+    from swiftannotate.image import Qwen2VLForImageCaptioning
+
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype="float16",
+        bnb_4bit_use_double_quant=True
+    )
+
+    model = AutoModelForImageTextToText.from_pretrained(
+        "Qwen/Qwen2-VL-7B-Instruct",
+        device_map="auto",
+        torch_dtype="auto",
+        quantization_config=quantization_config)
+
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
+
+    # Load the Caption Model
+    captioning_pipeline = ImageCaptioningQwen2VL(
+        model = model,
+        processor = processor,
+        output_file="captions.json"
+    )
+
+    # Generate captions for images
+    image_paths = ['path/to/image1.jpg']
+    results = captioning_pipeline.generate(image_paths)
+    
+    # Print results
+    # Output: [
+    #     {
+    #         'image_path': 'path/to/image1.jpg', 
+    #         'image_caption': 'A cat sitting on a table.', 
+    #         'validation_reasoning': 'The caption is valid.', 
+    #         'validation_score': 0.8
+    #     }, 
+    # ]
+    ```
     """
     def __init__(
         self, 
