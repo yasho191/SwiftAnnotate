@@ -5,8 +5,8 @@ from swiftannotate.image.base import ImageClassificationOutputGemini
 from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT, BASE_IMAGE_CLASSIFICATION_PROMPT
 
+# Setup logger
 logger = setup_logger(__name__)
-
 
 class GeminiForImageClassification(BaseImageClassification):
     def __init__(

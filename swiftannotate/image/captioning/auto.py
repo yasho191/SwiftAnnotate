@@ -9,7 +9,8 @@ from swiftannotate.image.base import ImageValidationOutputGemini
 from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
-logger = setup_logger(__name__)
+# Setup logger
+logger = setup_logger(__name__) 
 
 class AutoModelForImageCaptioning(BaseImageCaptioning):
     """

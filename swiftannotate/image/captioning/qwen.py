@@ -6,6 +6,7 @@ from swiftannotate.image.base import BaseImageCaptioning
 from swiftannotate.image.utils import setup_logger
 from swiftannotate.constants import BASE_IMAGE_CAPTION_VALIDATION_PROMPT, BASE_IMAGE_CAPTION_PROMPT
 
+# Setup logger
 logger = setup_logger(__name__)
     
 class Qwen2VLForImageCaptioning(BaseImageCaptioning):

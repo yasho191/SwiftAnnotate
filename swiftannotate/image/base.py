@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from typing import List, Tuple, Dict
 from swiftannotate.image.utils import encode_image, setup_logger
 
+# Setup logger
 logger = setup_logger(__name__)
-
 
 ##################################################
 #     Base Models for Image Annotation Tasks     #
