@@ -1,7 +1,8 @@
 from swiftannotate.image.captioning import (
     OpenAIForImageCaptioning, 
     Qwen2VLForImageCaptioning, 
-    GeminiForImageCaptioning
+    GeminiForImageCaptioning,
+    AutoModelForImageCaptioning
 )
 
 from swiftannotate.image.classification import (
@@ -14,6 +15,7 @@ __all__ = [
     "OpenAIForImageCaptioning",
     "Qwen2VLForImageCaptioning",
     "GeminiForImageCaptioning",
+    "AutoModelForImageCaptioning",
     "OpenAIForImageClassification",
     "Qwen2VLForImageClassification",
     "GeminiForImageClassification"
