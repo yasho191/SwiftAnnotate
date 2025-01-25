@@ -7,3 +7,7 @@
 ## Classification
 
 ::: swiftannotate.image.classification
+
+## Object Detection
+
+::: swiftannotate.image.object_detection
