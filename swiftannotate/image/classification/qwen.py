@@ -45,7 +45,7 @@ class Qwen2VLForImageClassification(BaseImageClassification):
 
     # Generate captions for images
     image_paths = ['path/to/image1.jpg']
-    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
+    results = classification_pipeline.generate(image_paths, **kwargs)
     
     # Print results
     # Output: [

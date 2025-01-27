@@ -27,7 +27,7 @@ class GeminiForImageClassification(BaseImageClassification):
 
     # Generate captions for a list of images
     image_paths = ["path/to/image1.jpg"]
-    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
+    results = classification_pipeline.generate(image_paths)
 
     # Print results
     # Output: [
