@@ -9,7 +9,7 @@ logger = setup_logger(__name__)
 
 class GeminiForImageCaptioning(BaseImageCaptioning):
     """
-    ImageCaptioningGemini pipeline for generating captions for images using Gemini models.
+    GeminiForImageClassification pipeline for generating captions for images using Gemini models.
     
     Example usage:
     ```python

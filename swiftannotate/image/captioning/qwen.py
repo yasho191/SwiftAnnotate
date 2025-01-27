@@ -11,7 +11,7 @@ logger = setup_logger(__name__)
     
 class Qwen2VLForImageCaptioning(BaseImageCaptioning):
     """
-    Image captioning pipeline using Qwen2VL model.
+    Qwen2VLForImageCaptioning pipeline using Qwen2VL model.
     
     Example usage:
     ```python
