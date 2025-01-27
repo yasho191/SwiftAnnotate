@@ -10,7 +10,36 @@ logger = setup_logger(__name__)
 
 class OpenAIForImageClassification(BaseImageClassification):
     """
-    Image classification pipeline using OpenAI API. 
+    OpenAIForImageClassification pipeline using OpenAI API.
+    
+    Example usage:
+    
+    ```python
+    from swiftannotate.image import OpenAIForImageClassification
+    
+    # Initialize the pipeline
+    classification_pipeline = OpenAIForImageClassification(
+        classification_model="gpt-4o",
+        validation_model="gpt-4o-mini",
+        api_key="your_api_key_here",
+        classification_labels=["kitchen", "bedroom", "living room"],
+        output_file="captions.json"
+    )
+
+    # Generate captions for a list of images
+    image_paths = ["path/to/image1.jpg"]
+    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
+
+    # Print results
+    # Output: [
+    #     {
+    #         "image_path": 'path/to/image1.jpg', 
+    #         "image_classification": 'kitchen', 
+    #         "validation_reasoning": 'The class label is valid.', 
+    #         "validation_score": 0.6
+    #     }, 
+    # ]
+    ```
     """
     def __init__(
         self, 

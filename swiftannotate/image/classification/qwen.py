@@ -11,7 +11,52 @@ logger = setup_logger(__name__)
   
 class Qwen2VLForImageClassification(BaseImageClassification):
     """
-    Image classification pipeline using Qwen2VL model.
+    Qwen2VLForImageClassification pipeline using Qwen2VL model.
+    
+    Example usage:
+    ```python
+    from transformers import AutoProcessor, AutoModelForImageTextToText
+    from transformers import BitsAndBytesConfig
+    from swiftannotate.image import Qwen2VLForImageClassification
+
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype="float16",
+        bnb_4bit_use_double_quant=True
+    )
+
+    model = AutoModelForImageTextToText.from_pretrained(
+        "Qwen/Qwen2-VL-7B-Instruct",
+        device_map="auto",
+        torch_dtype="auto",
+        quantization_config=quantization_config)
+
+    processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
+
+    # Load the Caption Model
+    kwargs = {"temperature": 0}
+    classification_pipeline = Qwen2VLForImageClassification(
+        model=model,
+        processor=processor,
+        classification_labels=["kitchen", "bottle", "none"],
+        output_file="output.json",
+    )
+
+    # Generate captions for images
+    image_paths = ['path/to/image1.jpg']
+    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
+    
+    # Print results
+    # Output: [
+    #     {
+    #         "image_path": 'path/to/image1.jpg', 
+    #         "image_classification": 'kitchen', 
+    #         "validation_reasoning": 'The class label is valid.', 
+    #         "validation_score": 0.6
+    #     }, 
+    # ]
+    ```
     """
     def __init__(
         self, 

@@ -9,6 +9,38 @@ from swiftannotate.constants import BASE_IMAGE_CLASSIFICATION_VALIDATION_PROMPT,
 logger = setup_logger(__name__)
 
 class GeminiForImageClassification(BaseImageClassification):
+    """
+    GeminiForImageClassification pipeline for generating captions for images using Gemini models.
+    
+    Example usage:
+    ```python
+    from swiftannotate.image import GeminiForImageClassification
+    
+    # Initialize the pipeline
+    classification_pipeline = GeminiForImageClassification(
+        caption_model="gemini-1.5-pro",
+        validation_model="gemini-1.5-flash",
+        api_key="your_api_key_here",
+        classification_labels=["kitchen", "bedroom", "living room"],
+        output_file="captions.json"
+    )
+
+    # Generate captions for a list of images
+    image_paths = ["path/to/image1.jpg"]
+    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
+
+    # Print results
+    # Output: [
+    #     {
+    #         "image_path": 'path/to/image1.jpg', 
+    #         "image_classification": 'kitchen', 
+    #         "validation_reasoning": 'The class label is valid.', 
+    #         "validation_score": 0.6
+    #     }, 
+    # ]
+    ```
+    """
+    
     def __init__(
         self, 
         classification_model: str, 
