@@ -36,13 +36,12 @@ def test_qwen2_image_classification(setup_qwen2_model_and_processor):
         processor=processor,
         classification_labels=["kitchen", "bottle", "none"],
         output_file="output.json",
-        kwargs=kwargs
     )
     
     test_dir = "tests/images"
     image_paths = [os.path.join(test_dir, image) for image in os.listdir(test_dir)]
     
-    results = classification_pipeline.generate(image_paths)
+    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
     
     assert isinstance(results, list)
     assert isinstance(results[0], dict)
@@ -55,7 +54,6 @@ def test_qwen2_image_classification(setup_qwen2_model_and_processor):
 def test_invalid_classification_labels(setup_qwen2_model_and_processor):
     from swiftannotate.image import Qwen2VLForImageClassification
     model, processor = setup_qwen2_model_and_processor
-    kwargs = {"temperature": 0}
     
     with pytest.raises(ValueError):
         Qwen2VLForImageClassification(
@@ -63,5 +61,4 @@ def test_invalid_classification_labels(setup_qwen2_model_and_processor):
             processor=processor,
             classification_labels=[],  # Empty labels should raise error
             output_file="output.json",
-            kwargs=kwargs
         )
