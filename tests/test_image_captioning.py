@@ -40,7 +40,8 @@ def test_qwen2_image_captioning(setup_qwen2_model_and_processor):
     test_dir = "tests/images"
     image_paths = [os.path.join(test_dir, image) for image in os.listdir(test_dir)]
     
-    results = captioning_pipeline.generate(image_paths)
+    kwargs = {"temperature": 0}
+    results = captioning_pipeline.generate(image_paths, **kwargs)
     
     assert isinstance(results, list), "Results should be a list"
     assert isinstance(results[0], dict), "Each result should be a dictionary"

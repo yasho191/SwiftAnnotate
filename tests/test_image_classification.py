@@ -41,7 +41,7 @@ def test_qwen2_image_classification(setup_qwen2_model_and_processor):
     test_dir = "tests/images"
     image_paths = [os.path.join(test_dir, image) for image in os.listdir(test_dir)]
     
-    results = classification_pipeline.generate(image_paths, kwargs=kwargs)
+    results = classification_pipeline.generate(image_paths, **kwargs)
     
     assert isinstance(results, list)
     assert isinstance(results[0], dict)
