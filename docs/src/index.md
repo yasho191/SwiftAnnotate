@@ -53,7 +53,7 @@ To install **SwiftAnnotate** from PyPI and set up the project environment, follo
 
 ## Annotator-Validator Pipeline for LLMs and VLMs
 
-![Annotation Pipeline](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/SwiftAnnotatePiepline.png?raw=True)
+![Annotation Pipeline](https://github.com/yasho191/SwiftAnnotate/blob/main/assets/SwiftAnnotatePipeline.png?raw=True)
 
 The annotator-validator pipeline ensures high-quality annotations through a two-stage process:
 
