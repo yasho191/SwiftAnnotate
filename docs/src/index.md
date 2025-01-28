@@ -87,7 +87,7 @@ The pipeline can be customized with different model combinations and validation 
 
 #### Captioning
 
-Currently, we support OpenAI, Google-Gemini, and Qwen2-VL for image captioning. To get started quickly refer the code snippets shown below.
+Currently, we support OpenAI, Google-Gemini, Ollama, and Qwen2-VL for image captioning. As Qwen2-VL is not yet available on Ollama it is supported through HuggingFace. To get started quickly refer the code snippets shown below.
 
 **OpenAI**
 
