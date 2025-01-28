@@ -43,10 +43,10 @@ def test_qwen2_image_classification(setup_qwen2_model_and_processor):
     
     results = classification_pipeline.generate(image_paths, **kwargs)
     
-    assert isinstance(results, list)
-    assert isinstance(results[0], dict)
-    assert len(results) == len(image_paths)
-    assert os.path.exists("output.json")
+    assert isinstance(results, list), "Results should be a list"
+    assert isinstance(results[0], dict), "Each result should be a dictionary"
+    assert len(results) == len(image_paths), "Number of results should be equal to number of images"
+    assert os.path.exists("output.json"), "Output file should be created"
     
     os.remove("output.json")
 
@@ -62,3 +62,32 @@ def test_invalid_classification_labels(setup_qwen2_model_and_processor):
             classification_labels=[],  # Empty labels should raise error
             output_file="output.json",
         )
+
+
+##############################
+#           Ollama           #
+##############################
+
+
+def test_ollama_image_classification():
+    from swiftannotate.image import OllamaForImageClassification
+    
+    classification_pipeline = OllamaForImageClassification(
+        caption_model="llava",
+        validation_model="llava",
+        classification_labels=["kitchen", "bottle", "none"],
+        output_file="output.json"
+    )
+    
+    test_dir = "tests/images"
+    image_paths = [os.path.join(test_dir, image) for image in os.listdir(test_dir)]
+    
+    kwargs = {"temperature": 0}
+    results = classification_pipeline.generate(image_paths, **kwargs)
+    
+    assert isinstance(results, list), "Results should be a list"
+    assert isinstance(results[0], dict), "Each result should be a dictionary"
+    assert len(results) == len(image_paths), "Number of results should be equal to number of images"
+    assert os.path.exists("output.json"), "Output file should be created"
+    
+    os.remove("output.json")

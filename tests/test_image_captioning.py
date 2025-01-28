@@ -50,4 +50,30 @@ def test_qwen2_image_captioning(setup_qwen2_model_and_processor):
     
     os.remove("output.json")
     
+
+##############################
+#           Ollama           #
+##############################
+
+
+def test_ollama_image_classification():
+    from swiftannotate.image import OllamaForImageCaptioning
     
+    captioning_pipeline = OllamaForImageCaptioning(
+        caption_model="llava",
+        validation_model="llava",
+        output_file="output.json"
+    )
+    
+    test_dir = "tests/images"
+    image_paths = [os.path.join(test_dir, image) for image in os.listdir(test_dir)]
+    
+    kwargs = {"temperature": 0}
+    results = captioning_pipeline.generate(image_paths, **kwargs)
+    
+    assert isinstance(results, list), "Results should be a list"
+    assert isinstance(results[0], dict), "Each result should be a dictionary"
+    assert len(results) == len(image_paths), "Number of results should be equal to number of images"
+    assert os.path.exists("output.json"), "Output file should be created"
+    
+    os.remove("output.json")
