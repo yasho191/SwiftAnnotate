@@ -109,6 +109,9 @@ class Qwen2VLForImageClassification(BaseImageClassification):
         Notes:
             `validation_prompt` should specify the rules for validating the class label and the range of validation score to be generated example (0-1).
             Your `validation_threshold` should be within this specified range.
+            
+            It is advised to include class descriptions in the classification_prompt and validation_prompt to help the model understand the context of the class labels.
+            You can also add Few-shot learning examples to the prompt to help the model understand the context of the class labels.
         """    
         
         if not isinstance(model, Qwen2VLForConditionalGeneration):
