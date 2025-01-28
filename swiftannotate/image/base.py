@@ -418,10 +418,19 @@ class ImageValidationOutputGemini(TypedDict):
     validation_reasoning: str
     confidence: float
     
+    
+class ImageValidationOutputOllama(BaseModel):
+    validation_reasoning: str
+    confidence: float
+    
 
 class ImageClassificationOutputOpenAI(BaseModel):
     class_label: str
 
 
 class ImageClassificationOutputGemini(TypedDict):
+    class_label: str
+
+
+class ImageClassificationOutputOllama(BaseModel):
     class_label: str
