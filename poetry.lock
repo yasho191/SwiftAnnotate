@@ -2513,6 +2513,22 @@ files = [
 ]
 
 [[package]]
+name = "ollama"
+version = "0.4.7"
+description = "The official Python client for Ollama."
+optional = false
+python-versions = "<4.0,>=3.8"
+groups = ["main"]
+files = [
+    {file = "ollama-0.4.7-py3-none-any.whl", hash = "sha256:85505663cca67a83707be5fb3aeff0ea72e67846cea5985529d8eca4366564a1"},
+    {file = "ollama-0.4.7.tar.gz", hash = "sha256:891dcbe54f55397d82d289c459de0ea897e103b86a3f1fad0fdb1895922a75ff"},
+]
+
+[package.dependencies]
+httpx = ">=0.27,<0.29"
+pydantic = ">=2.9.0,<3.0.0"
+
+[[package]]
 name = "openai"
 version = "1.59.8"
 description = "The official Python library for the openai API"
@@ -4479,5 +4495,5 @@ test = ["websockets"]
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.10"
-content-hash = "e55d2599f551af1fd50f4f9f72cfdbcc6b01d9ac3b885582af15f2a91b65ce58"
+python-versions = ">=3.10,<4.0"
+content-hash = "87feb965f3d277eb8e0963dbdd2b0072071bf3a2bf4c6fa31ff2402f7d0bc63d"
