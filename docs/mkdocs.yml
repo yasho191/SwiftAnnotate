@@ -52,6 +52,8 @@ plugins:
   - mkdocstrings
 
 markdown_extensions:
+  - toc:
+      toc_depth: 2
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
