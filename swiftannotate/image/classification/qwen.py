@@ -72,7 +72,7 @@ class Qwen2VLForImageClassification(BaseImageClassification):
         **kwargs
     ):     
         """
-        Initializes the ImageClassificationQwen2VL pipeline.
+        Initializes the Qwen2VLForImageClassification pipeline.
 
         Args:
             model (AutoModelForImageTextToText): 

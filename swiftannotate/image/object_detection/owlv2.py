@@ -96,8 +96,8 @@ class OwlV2ForObjectDetection(BaseObjectDetection):
         
         Currently, there is no validation method available for Object Detection.
         
-        # TODO: Idea is to do some sort of object etraction using annotations and ask VLM to validate the extracted objects.
-        # TODO: Need to fihgure out a way to use the VLM output for improving annotations.
+        # TODO: Idea is to do some sort of object extraction using annotations and ask VLM to validate the extracted objects.
+        # TODO: Need to figure out a way to use the VLM output for improving annotations.
 
         Args:
             image (Image.Image): Image to be validated.

@@ -101,7 +101,7 @@ api_key = "<YOUR_OPENAI_API_KEY>"
 BASE_DIR = "<IMAGE_DIR>"
 image_paths = [os.path.join(BASE_DIR, image) for image in os.listdir(BASE_DIR)]
 
-image_captioning_pipeline = ImageCaptioningOpenAI(
+image_captioning_pipeline = OpenAIForImageCaptioning(
     caption_model=caption_model,
     validation_model=validation_model,
     api_key=api_key,
@@ -141,7 +141,7 @@ model = AutoModelForImageTextToText.from_pretrained(
 processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
 
 # Load the Caption Model
-captioning_pipeline = ImageCaptioningQwen2VL(
+captioning_pipeline = Qwen2VLForImageCaptioning(
     model = model,
     processor = processor,
     output_file="image_captioning_output.json"

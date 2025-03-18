@@ -35,7 +35,7 @@ class Qwen2VLForImageCaptioning(BaseImageCaptioning):
     processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
 
     # Load the Caption Model
-    captioning_pipeline = ImageCaptioningQwen2VL(
+    captioning_pipeline = Qwen2VLForImageCaptioning(
         model = model,
         processor = processor,
         output_file="captions.json"

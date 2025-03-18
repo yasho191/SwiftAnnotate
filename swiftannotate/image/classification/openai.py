@@ -56,7 +56,7 @@ class OpenAIForImageClassification(BaseImageClassification):
         **kwargs
     ):
         """
-        Initializes the ImageClassificationOpenAI pipeline.
+        Initializes the OpenAIForImageClassification pipeline.
 
         Args:
             classification_model (str): 

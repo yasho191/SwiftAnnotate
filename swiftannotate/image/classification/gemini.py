@@ -55,7 +55,7 @@ class GeminiForImageClassification(BaseImageClassification):
         output_file: str | None = None,
     ):
         """
-        Initializes the ImageClassificationGemini pipeline.
+        Initializes the GeminiForImageClassification pipeline.
 
         Args:
             classification_model (str): 
